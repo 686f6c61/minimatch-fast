@@ -1,0 +1,83 @@
+{
+  "name": "minimatch-fast",
+  "version": "0.2.1",
+  "type": "module",
+  "description": "Drop-in replacement for minimatch. 6-25x faster. Powered by picomatch.",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run build:cjs && npm run build:esm && npm run build:fixup",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:fixup": "node scripts/fixup.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:compat": "vitest run -c vitest.compat.config.ts",
+    "benchmark": "tsx benchmarks/run.ts",
+    "prepublishOnly": "npm run build && npm test",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "braces": "^3.0.3",
+    "picomatch": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/braces": "^3.0.5",
+    "@types/node": "^22.10.0",
+    "@types/picomatch": "^4.0.2",
+    "@vitest/coverage-v8": "^3.1.0",
+    "benchmark": "^2.1.4",
+    "minimatch": "^10.1.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.1.0"
+  },
+  "keywords": [
+    "glob",
+    "minimatch",
+    "picomatch",
+    "fast",
+    "pattern",
+    "matcher",
+    "match",
+    "file",
+    "filter",
+    "wildcard",
+    "bash",
+    "regex",
+    "regexp",
+    "globbing"
+  ],
+  "author": "686f6c61",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/686f6c61/minimatch-fast.git"
+  },
+  "bugs": {
+    "url": "https://github.com/686f6c61/minimatch-fast/issues"
+  },
+  "homepage": "https://minimatch-fast.onrender.com"
+}

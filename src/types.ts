@@ -1,0 +1,231 @@
+/**
+ * @fileoverview Type definitions for minimatch-fast
+ *
+ * This file contains all TypeScript type definitions used throughout the package.
+ * These types are 100% compatible with minimatch v10.x, ensuring seamless migration
+ * for projects switching from the original minimatch package.
+ *
+ * @author 686f6c61
+ * @see https://github.com/686f6c61/minimatch-fast
+ * @license MIT
+ */
+
+/**
+ * Supported platforms for path handling
+ */
+export type Platform =
+  | 'aix'
+  | 'android'
+  | 'darwin'
+  | 'freebsd'
+  | 'haiku'
+  | 'linux'
+  | 'openbsd'
+  | 'sunos'
+  | 'win32'
+  | 'cygwin'
+  | 'netbsd';
+
+/**
+ * Path separator types
+ */
+export type Sep = '\\' | '/';
+
+/**
+ * RegExp with additional metadata
+ */
+export type MMRegExp = RegExp & {
+  _src?: string;
+  _glob?: string;
+};
+
+/**
+ * Symbol representing globstar pattern (**)
+ */
+export const GLOBSTAR: unique symbol = Symbol('globstar **');
+export type GlobstarSymbol = typeof GLOBSTAR;
+
+/**
+ * Parse return types
+ */
+export type ParseReturnFiltered = string | MMRegExp | GlobstarSymbol;
+export type ParseReturn = ParseReturnFiltered | false;
+
+/**
+ * Options for minimatch functions
+ * All options are optional and default to false unless otherwise specified
+ */
+export interface MinimatchOptions {
+  /**
+   * Do not expand {a,b} and {1..3} brace sets
+   * @default false
+   */
+  nobrace?: boolean;
+
+  /**
+   * Disable pattern comments starting with #
+   * When false (default), patterns starting with # are treated as comments and match nothing
+   * @default false
+   */
+  nocomment?: boolean;
+
+  /**
+   * Disable negation with leading !
+   * When false (default), patterns starting with ! are negated
+   * @default false
+   */
+  nonegate?: boolean;
+
+  /**
+   * Enable debug output
+   * @default false
+   */
+  debug?: boolean;
+
+  /**
+   * Disable ** matching across directory separators
+   * When true, ** behaves like *
+   * @default false
+   */
+  noglobstar?: boolean;
+
+  /**
+   * Disable extglob patterns like +(a|b), *(a|b), ?(a|b), @(a|b), !(a|b)
+   * @default false
+   */
+  noext?: boolean;
+
+  /**
+   * Return the pattern itself when no matches are found
+   * Only applies to minimatch.match()
+   * @default false
+   */
+  nonull?: boolean;
+
+  /**
+   * Treat backslash as path separator only, not as escape character
+   * Replaces all \ with / before processing
+   * Useful for Windows paths
+   * @default false
+   */
+  windowsPathsNoEscape?: boolean;
+
+  /**
+   * Legacy alias: when set to false, enables windowsPathsNoEscape
+   * @deprecated Use windowsPathsNoEscape instead
+   */
+  allowWindowsEscape?: boolean;
+
+  /**
+   * Perform partial matching
+   * Useful when traversing directories and full path is not yet known
+   * @default false
+   */
+  partial?: boolean;
+
+  /**
+   * Match patterns without slashes against basename of the path
+   * e.g., *.js will match path/to/file.js
+   * @default false
+   */
+  matchBase?: boolean;
+
+  /**
+   * Preserve multiple consecutive slashes
+   * By default, multiple slashes are collapsed to one
+   * @default false
+   */
+  preserveMultipleSlashes?: boolean;
+
+  /**
+   * Match dotfiles (files starting with .)
+   * By default, * and ** do not match dotfiles unless pattern also starts with .
+   * @default false
+   */
+  dot?: boolean;
+
+  /**
+   * Perform case-insensitive matching
+   * @default false
+   */
+  nocase?: boolean;
+
+  /**
+   * When used with nocase, only use case-insensitive regex
+   * but leave string comparisons case-sensitive
+   * Has no effect without nocase: true
+   * @default false
+   */
+  nocaseMagicOnly?: boolean;
+
+  /**
+   * Treat brace expansion as "magic" for hasMagic()
+   * When true, patterns like {a,b} are considered to have magic
+   * @default false
+   */
+  magicalBraces?: boolean;
+
+  /**
+   * Invert the result of negation
+   * When true, negated patterns return true on hit and false on miss
+   * @default false
+   */
+  flipNegate?: boolean;
+
+  /**
+   * Optimization level for pattern processing
+   * 0 = no optimization
+   * 1 = basic optimization (default)
+   * 2+ = aggressive optimization
+   * @default 1
+   */
+  optimizationLevel?: number;
+
+  /**
+   * Override platform detection for path handling
+   */
+  platform?: Platform;
+
+  /**
+   * Windows-specific: disable magic root detection for drive letters
+   * @default false on non-Windows, true on Windows with nocase
+   */
+  windowsNoMagicRoot?: boolean;
+}
+
+/**
+ * Options specifically for picomatch (internal use)
+ */
+export interface PicomatchOptions {
+  dot?: boolean;
+  nocase?: boolean;
+  nonegate?: boolean;
+  noextglob?: boolean;
+  noglobstar?: boolean;
+  nobrace?: boolean;
+  basename?: boolean;
+  posix?: boolean;
+  windows?: boolean;
+  contains?: boolean;
+  flags?: string;
+  matchBase?: boolean;
+  posixSlashes?: boolean;
+  expandRange?: (a: string, b: string) => string;
+}
+
+/**
+ * Result of translating minimatch options to picomatch options
+ */
+export interface TranslatedOptions {
+  picoOpts: PicomatchOptions;
+  special: {
+    nocomment: boolean;
+    nonull: boolean;
+    flipNegate: boolean;
+    windowsPathsNoEscape: boolean;
+    partial: boolean;
+    magicalBraces: boolean;
+    debug: boolean;
+    optimizationLevel: number;
+  };
+}

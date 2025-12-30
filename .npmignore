@@ -1,0 +1,36 @@
+# Source code (dist is published via "files" in package.json)
+src/
+
+# Tests
+test/
+*.test.ts
+*.test.js
+vitest.config.ts
+vitest.compat.config.ts
+coverage/
+
+# Benchmarks
+benchmarks/
+
+# Build config
+tsconfig*.json
+
+# Development files
+.gitignore
+.github/
+.vscode/
+.idea/
+
+# Scripts
+scripts/
+
+# Documentation that's not needed in package
+CONTRIBUTING.md
+proyecto-minimatch-nodejs-spec-v2.md
+
+# Landing page (deployed separately)
+landing/
+
+# Misc
+*.log
+.DS_Store
