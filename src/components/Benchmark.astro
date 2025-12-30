@@ -1,0 +1,112 @@
+---
+const benchmarks = [
+  { pattern: 'Simple star (*.js)', minimatch: 'Baseline', fast: '6.5x faster', highlight: true },
+  { pattern: 'Globstar (**/*.js)', minimatch: 'Baseline', fast: '5.9x faster', highlight: true },
+  { pattern: 'Brace patterns ({a,b})', minimatch: 'Baseline', fast: '15.1x faster', highlight: true },
+  { pattern: 'Complex braces', minimatch: 'Baseline', fast: '26.6x faster', highlight: true },
+  { pattern: 'Character class ([0-9])', minimatch: 'Baseline', fast: '7.3x faster', highlight: true },
+  { pattern: 'Negation patterns (!*.min.js)', minimatch: 'Baseline', fast: '6.5x faster', highlight: true },
+  { pattern: 'Pre-compiled class', minimatch: 'Baseline', fast: '1.5x faster', highlight: false },
+];
+
+const securityComparison = [
+  { feature: 'CVE-2022-3517 (ReDoS)', minimatch: 'Vulnerable', fast: 'Not affected', danger: true },
+  { feature: 'Pattern {1..1000}', minimatch: 'Freezes', fast: 'Instant', danger: true },
+  { feature: 'Brace expansion limit', minimatch: 'None', fast: '10,000 max', danger: false },
+];
+---
+
+<section class="benchmarks" id="benchmarks">
+  <div class="container">
+    <div class="section-header">
+      <h2>Performance Benchmarks</h2>
+      <p>Real measurements comparing minimatch-fast vs minimatch v10.x</p>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Pattern</th>
+            <th>minimatch</th>
+            <th>minimatch-fast</th>
+          </tr>
+        </thead>
+        <tbody>
+          {benchmarks.map(row => (
+            <tr>
+              <td><code>{row.pattern}</code></td>
+              <td>{row.minimatch}</td>
+              <td class={row.highlight ? 'highlight' : ''}><strong>{row.fast}</strong></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="mt-4 mb-2">Security Comparison</h3>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>minimatch</th>
+            <th>minimatch-fast</th>
+          </tr>
+        </thead>
+        <tbody>
+          {securityComparison.map(row => (
+            <tr>
+              <td>{row.feature}</td>
+              <td class={row.danger ? 'danger' : ''}>{row.minimatch}</td>
+              <td class="success"><strong>{row.fast}</strong></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <p class="benchmark-note">
+      Benchmarks run on Node.js with 10,000 iterations per pattern.
+      Results may vary based on hardware and pattern complexity.
+    </p>
+  </div>
+</section>
+
+<style>
+  .benchmarks {
+    padding: 5rem 0;
+    background-color: var(--gray-50);
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 2rem;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  .highlight {
+    background-color: var(--gray-100);
+  }
+
+  .danger {
+    color: var(--gray-600);
+    text-decoration: line-through;
+  }
+
+  .success {
+    background-color: var(--gray-100);
+  }
+
+  .benchmark-note {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+    text-align: center;
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+  }
+</style>

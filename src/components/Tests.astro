@@ -1,0 +1,157 @@
+---
+import Check from './icons/Check.astro';
+import CodeBlock from './CodeBlock.astro';
+
+const testCategories = [
+  { name: 'Unit Tests', count: 42, description: 'Core functionality tests' },
+  { name: 'Compatibility Tests', count: 196, description: 'Behavior parity with minimatch' },
+  { name: 'Edge Case Tests', count: 42, description: 'Windows paths, dotfiles, negation' },
+  { name: 'Security Tests', count: 22, description: 'CVE-2022-3517 regression tests' },
+  { name: 'Verification Tests', count: 53, description: 'POSIX classes, Unicode, regex edge cases' },
+];
+
+const runTests = `# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Run compatibility tests only
+npm run test:compat`;
+---
+
+<section class="tests" id="tests">
+  <div class="container">
+    <div class="section-header">
+      <h2>Testing & Compatibility</h2>
+      <p>Comprehensive test suite ensures reliability</p>
+    </div>
+
+    <div class="test-grid">
+      {testCategories.map(cat => (
+        <div class="test-card">
+          <div class="test-icon">
+            <Check size={24} />
+          </div>
+          <div class="test-info">
+            <div class="test-count">{cat.count}</div>
+            <div class="test-name">{cat.name}</div>
+            <div class="test-desc">{cat.description}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="test-details">
+      <h3>355 Tests Total</h3>
+      <p>
+        Every release is verified against the original minimatch test suite plus
+        additional tests for edge cases, Windows paths, and security vulnerabilities.
+      </p>
+
+      <h3>Running Tests</h3>
+      <CodeBlock lang="bash" code={runTests} />
+
+      <h3>Reporting Issues</h3>
+      <p>
+        Found a compatibility issue? Please open an issue on GitHub with:
+      </p>
+      <ul>
+        <li>The pattern and path that produces different results</li>
+        <li>Expected behavior (what minimatch returns)</li>
+        <li>Actual behavior (what minimatch-fast returns)</li>
+        <li>Any relevant options used</li>
+      </ul>
+      <p>
+        <a href="https://github.com/686f6c61/minimatch-fast/issues" target="_blank" rel="noopener noreferrer">
+          Open an issue on GitHub
+        </a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tests {
+    padding: 5rem 0;
+    background-color: var(--gray-50);
+  }
+
+  .test-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .test-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background-color: var(--white);
+    border: 1px solid var(--black);
+    border-radius: 8px;
+  }
+
+  .test-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+  }
+
+  .test-count {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .test-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .test-desc {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+  }
+
+  .test-details {
+    background-color: var(--white);
+    border: 1px solid var(--black);
+    border-radius: 8px;
+    padding: 2rem;
+  }
+
+  .test-details h3 {
+    font-size: 1.125rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .test-details h3:first-child {
+    margin-top: 0;
+  }
+
+  .test-details p {
+    color: var(--gray-600);
+    line-height: 1.6;
+  }
+
+  .test-details ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+    color: var(--gray-600);
+  }
+
+  .test-details li {
+    margin-bottom: 0.5rem;
+  }
+</style>

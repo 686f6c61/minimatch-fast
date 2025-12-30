@@ -1,0 +1,152 @@
+---
+import Shield from './icons/Shield.astro';
+import CodeBlock from './CodeBlock.astro';
+
+const vulnerablePattern = `// CVE-2022-3517 - Vulnerable pattern in minimatch
+// This causes catastrophic backtracking (ReDoS)
+const pattern = '[!' + 'a'.repeat(50000) + ']';
+
+// In minimatch: hangs for minutes or crashes
+minimatch('test', pattern);
+
+// In minimatch-fast: instant, no vulnerability
+minimatch('test', pattern); // false, returns immediately`;
+
+const braceExample = `// Dangerous brace expansion in minimatch
+// This creates 1,000,000 patterns and freezes
+
+const pattern = '{1..1000000}';
+minimatch.braceExpand(pattern); // Hangs
+
+// In minimatch-fast: limited to 10,000 max
+// Returns original pattern if limit exceeded`;
+---
+
+<section class="security" id="security">
+  <div class="container">
+    <div class="section-header">
+      <h2>Security</h2>
+      <p>Built-in protection against common vulnerabilities</p>
+    </div>
+
+    <div class="security-grid">
+      <div class="security-card">
+        <div class="security-icon">
+          <Shield size={32} />
+        </div>
+        <h3>CVE-2022-3517 Protection</h3>
+        <p>
+          The original minimatch is vulnerable to Regular Expression Denial of Service (ReDoS) via
+          CVE-2022-3517. Malicious patterns can cause catastrophic backtracking, freezing your application.
+        </p>
+        <p>
+          minimatch-fast uses picomatch internally, which is specifically designed to avoid
+          backtracking issues and is not vulnerable to this CVE.
+        </p>
+        <CodeBlock lang="javascript" code={vulnerablePattern} />
+      </div>
+
+      <div class="security-card">
+        <div class="security-icon">
+          <Shield size={32} />
+        </div>
+        <h3>Brace Expansion Limits</h3>
+        <p>
+          Unconstrained brace expansion can be exploited to create denial of service attacks.
+          A pattern like <code>{`{1..1000000}`}</code> would generate a million patterns,
+          consuming all available memory.
+        </p>
+        <p>
+          minimatch-fast limits brace expansion to 10,000 patterns maximum and range
+          expansion to 1,000 items, preventing DoS attacks.
+        </p>
+        <CodeBlock lang="javascript" code={braceExample} />
+      </div>
+    </div>
+
+    <div class="security-summary">
+      <h3>Security Features</h3>
+      <ul>
+        <li>Not affected by CVE-2022-3517 (ReDoS)</li>
+        <li>Maximum 10,000 patterns from brace expansion</li>
+        <li>Maximum 1,000 items in range expansion ({`{1..N}`})</li>
+        <li>No catastrophic backtracking in regex</li>
+        <li>Graceful fallback for oversized patterns</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .security {
+    padding: 5rem 0;
+    background-color: var(--gray-50);
+  }
+
+  .security-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .security-card {
+    background-color: var(--white);
+    border: 1px solid var(--black);
+    border-radius: 8px;
+    padding: 2rem;
+  }
+
+  .security-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 1.5rem;
+    background-color: var(--gray-100);
+    border: 1px solid var(--black);
+    border-radius: 8px;
+  }
+
+  .security-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .security-card p {
+    color: var(--gray-600);
+    line-height: 1.6;
+  }
+
+  .security-summary {
+    background-color: var(--white);
+    border: 1px solid var(--black);
+    border-radius: 8px;
+    padding: 2rem;
+  }
+
+  .security-summary h3 {
+    margin-bottom: 1rem;
+  }
+
+  .security-summary ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  .security-summary li {
+    margin-bottom: 0.5rem;
+    color: var(--gray-600);
+  }
+
+  .security-summary li:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 768px) {
+    .security-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

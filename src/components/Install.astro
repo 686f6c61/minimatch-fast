@@ -1,0 +1,115 @@
+---
+import CodeBlock from './CodeBlock.astro';
+---
+
+<section class="install" id="install">
+  <div class="container">
+    <div class="section-header">
+      <h2>Installation</h2>
+      <p>Two ways to upgrade from minimatch</p>
+    </div>
+
+    <div class="install-grid">
+      <div class="install-option">
+        <h3>Option 1: Update imports</h3>
+        <p>Install the package and update your import statements:</p>
+
+        <CodeBlock
+          lang="bash"
+          title="Terminal"
+          code={`npm uninstall minimatch
+npm install minimatch-fast`}
+        />
+
+        <p>Then update your imports:</p>
+
+        <div class="diff-block">
+          <pre><code><span class="diff-remove">- const minimatch = require('minimatch');</span>
+<span class="diff-add">+ const minimatch = require('minimatch-fast');</span></code></pre>
+        </div>
+
+        <div class="diff-block">
+          <pre><code><span class="diff-remove">- import minimatch from 'minimatch';</span>
+<span class="diff-add">+ import minimatch from 'minimatch-fast';</span></code></pre>
+        </div>
+      </div>
+
+      <div class="install-option">
+        <h3>Option 2: npm aliasing</h3>
+        <p>Zero code changes required. Use npm's package aliasing:</p>
+
+        <CodeBlock
+          lang="bash"
+          title="Terminal"
+          code="npm install minimatch@npm:minimatch-fast"
+        />
+
+        <p>This installs minimatch-fast as <code>minimatch</code>, so all your existing imports continue to work without any changes.</p>
+
+        <div class="alias-note">
+          <strong>Note:</strong> This also updates minimatch for all your dependencies that use it.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .install {
+    padding: 5rem 0;
+  }
+
+  .install-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 3rem;
+  }
+
+  .install-option h3 {
+    margin-bottom: 1rem;
+  }
+
+  .diff-block {
+    margin-bottom: 1rem;
+    border: 1px solid var(--black);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .diff-block pre {
+    margin: 0;
+    padding: 1rem;
+    border: none;
+    border-radius: 0;
+  }
+
+  .diff-remove {
+    display: block;
+    background-color: #fee;
+    color: #900;
+    margin: -0.25rem -1rem;
+    padding: 0.25rem 1rem;
+  }
+
+  .diff-add {
+    display: block;
+    background-color: #efe;
+    color: #090;
+    margin: -0.25rem -1rem;
+    padding: 0.25rem 1rem;
+  }
+
+  .alias-note {
+    padding: 1rem;
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    font-size: 0.875rem;
+  }
+
+  @media (max-width: 768px) {
+    .install-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

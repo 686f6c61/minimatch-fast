@@ -1,0 +1,101 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Drop-in replacement for minimatch. 6-25x faster. Zero vulnerabilities. The fastest glob pattern matching library for Node.js.'
+} = Astro.props;
+
+const siteUrl = 'https://minimatch-fast.onrender.com';
+const siteName = 'minimatch-fast';
+
+// Structured data for SEO (SoftwareApplication schema)
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "minimatch-fast",
+  "description": "Drop-in replacement for minimatch. 6-25x faster glob pattern matching for Node.js. Zero vulnerabilities, 100% API compatible.",
+  "url": siteUrl,
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Cross-platform",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "686f6c61",
+    "url": "https://github.com/686f6c61"
+  },
+  "license": "https://opensource.org/licenses/MIT",
+  "programmingLanguage": ["JavaScript", "TypeScript"],
+  "runtimePlatform": "Node.js",
+  "softwareVersion": "0.2.0",
+  "downloadUrl": "https://www.npmjs.com/package/minimatch-fast",
+  "releaseNotes": "LRU pattern cache, fast paths for simple patterns, 9.4x faster average performance",
+  "keywords": ["glob", "minimatch", "pattern matching", "fast", "performance", "nodejs", "javascript", "typescript"]
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO Meta Tags -->
+    <meta name="keywords" content="minimatch, glob, pattern matching, fast, performance, nodejs, javascript, typescript, picomatch, file matching, wildcard, regex, npm package" />
+    <meta name="author" content="686f6c61" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={siteUrl} />
+
+    <!-- Performance & Security -->
+    <meta name="theme-color" content="#000000" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={siteUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content={`${siteUrl}/og_image.png`} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="minimatch-fast - 6-25x faster glob pattern matching" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={siteUrl} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${siteUrl}/og_image.png`} />
+    <meta name="twitter:image:alt" content="minimatch-fast - 6-25x faster glob pattern matching" />
+
+    <!-- Additional SEO -->
+    <meta name="application-name" content={siteName} />
+    <meta name="apple-mobile-web-app-title" content={siteName} />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+</style>

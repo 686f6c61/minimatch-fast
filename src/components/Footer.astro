@@ -1,0 +1,159 @@
+---
+import GitHub from './icons/GitHub.astro';
+import Npm from './icons/Npm.astro';
+
+const links = [
+  { href: 'https://www.npmjs.com/package/minimatch-fast', label: 'npm', icon: Npm },
+  { href: 'https://github.com/686f6c61/minimatch-fast', label: 'GitHub', icon: GitHub },
+  { href: 'https://github.com/686f6c61/minimatch-fast/issues', label: 'Issues', icon: null },
+  { href: 'https://github.com/686f6c61/minimatch-fast/blob/main/LICENSE', label: 'MIT License', icon: null },
+];
+
+const credits = [
+  { name: 'Isaac Z. Schlueter', project: 'minimatch', url: 'https://github.com/isaacs/minimatch' },
+  { name: 'Jon Schlinkert', project: 'picomatch', url: 'https://github.com/micromatch/picomatch' },
+  { name: 'Jon Schlinkert', project: 'braces', url: 'https://github.com/micromatch/braces' },
+];
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <span class="footer-logo">minimatch-fast</span>
+        <p class="footer-tagline">
+          Drop-in replacement for minimatch.<br />
+          6-25x faster. Zero vulnerabilities.
+        </p>
+      </div>
+
+      <div class="footer-links">
+        <h4>Links</h4>
+        <ul>
+          {links.map(link => (
+            <li>
+              <a href={link.href} target="_blank" rel="noopener noreferrer">
+                {link.icon && <link.icon size={16} />}
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="footer-credits">
+        <h4>Credits</h4>
+        <ul>
+          {credits.map(credit => (
+            <li>
+              <a href={credit.url} target="_blank" rel="noopener noreferrer">
+                {credit.name}
+              </a>
+              <span>({credit.project})</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>
+        MIT License. Built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer">Astro</a>.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding: 4rem 0 2rem;
+    background-color: var(--black);
+    color: var(--white);
+  }
+
+  .footer-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+
+  .footer-logo {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .footer-tagline {
+    margin-top: 1rem;
+    color: var(--gray-400);
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  .footer h4 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-400);
+    margin-bottom: 1rem;
+  }
+
+  .footer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .footer li {
+    margin-bottom: 0.75rem;
+  }
+
+  .footer a {
+    color: var(--white);
+    text-decoration: none;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.15s ease;
+  }
+
+  .footer a:hover {
+    color: var(--gray-300);
+  }
+
+  .footer-credits li span {
+    color: var(--gray-500);
+    font-size: 0.75rem;
+    margin-left: 0.25rem;
+  }
+
+  .footer-bottom {
+    padding-top: 2rem;
+    border-top: 1px solid var(--gray-800);
+    text-align: center;
+  }
+
+  .footer-bottom p {
+    color: var(--gray-500);
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  .footer-bottom a {
+    color: var(--gray-400);
+  }
+
+  @media (max-width: 768px) {
+    .footer-content {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .footer-brand {
+      text-align: center;
+    }
+  }
+</style>

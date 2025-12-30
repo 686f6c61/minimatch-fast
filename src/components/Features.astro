@@ -1,0 +1,96 @@
+---
+import Speed from './icons/Speed.astro';
+import Shield from './icons/Shield.astro';
+import Stable from './icons/Stable.astro';
+import Check from './icons/Check.astro';
+import TypeScriptIcon from './icons/TypeScript.astro';
+import Package from './icons/Package.astro';
+
+const features = [
+  {
+    icon: Speed,
+    title: 'Lightning Fast',
+    description: '6-25x faster than minimatch. Powered by picomatch engine with LRU caching and optimized fast paths for common patterns.'
+  },
+  {
+    icon: Shield,
+    title: 'Secure',
+    description: 'Not vulnerable to CVE-2022-3517 (ReDoS). Built-in protection against catastrophic backtracking and DoS attacks.'
+  },
+  {
+    icon: Stable,
+    title: 'Stable',
+    description: 'Never freezes on patterns like {1..1000}. Limits on brace expansion prevent hanging or memory issues.'
+  },
+  {
+    icon: Check,
+    title: '100% Compatible',
+    description: 'Drop-in replacement with identical API. 355 tests ensure full compatibility with minimatch v10.x behavior.'
+  },
+  {
+    icon: TypeScriptIcon,
+    title: 'TypeScript Ready',
+    description: 'Full TypeScript support with complete type definitions included. No need to install separate @types packages.'
+  },
+  {
+    icon: Package,
+    title: 'Dual Module Support',
+    description: 'Works with both ESM and CommonJS. Use import or require() - we support both module systems out of the box.'
+  }
+];
+---
+
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-header">
+      <h2>Why minimatch-fast?</h2>
+      <p>The performance and security upgrade your glob matching needs</p>
+    </div>
+
+    <div class="card-grid">
+      {features.map(feature => (
+        <div class="card feature-card">
+          <div class="feature-icon">
+            <feature.icon size={32} />
+          </div>
+          <h3 class="feature-title">{feature.title}</h3>
+          <p class="feature-description">{feature.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .features {
+    padding: 5rem 0;
+  }
+
+  .feature-card {
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1.5rem;
+    background-color: var(--gray-100);
+    border: 1px solid var(--black);
+    border-radius: 12px;
+  }
+
+  .feature-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-description {
+    color: var(--gray-600);
+    margin-bottom: 0;
+    line-height: 1.6;
+  }
+</style>

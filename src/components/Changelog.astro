@@ -1,0 +1,277 @@
+---
+const versions = [
+  {
+    version: '0.2.0',
+    date: '29/12/2025',
+    tag: 'Current',
+    highlights: [
+      'LRU pattern cache (500 entries)',
+      'Fast paths for simple patterns',
+      'Brace expansion cache (200 entries)',
+      'Cache utility functions'
+    ],
+    performance: '9.4x faster average',
+    changes: [
+      { type: 'added', text: 'Pattern cache for compiled Minimatch instances' },
+      { type: 'added', text: 'Fast paths for *, *.js, ???, .* patterns' },
+      { type: 'added', text: 'Brace expansion cache' },
+      { type: 'added', text: 'clearCache() and getCacheSize() utilities' },
+      { type: 'changed', text: 'Pre-computed regex flags in Minimatch class' },
+      { type: 'changed', text: 'Optimized basename extraction' },
+      { type: 'changed', text: 'Smarter Windows path normalization' },
+    ]
+  },
+  {
+    version: '0.1.0',
+    date: '10/11/2025',
+    tag: 'Initial Release',
+    highlights: [
+      '100% API compatible with minimatch',
+      'Powered by picomatch engine',
+      'Full TypeScript support',
+      'Dual ESM/CJS exports'
+    ],
+    performance: '7-29x faster',
+    changes: [
+      { type: 'added', text: 'Initial release of minimatch-fast' },
+      { type: 'added', text: '100% API compatibility with minimatch v10.x' },
+      { type: 'added', text: 'Full TypeScript support with type definitions' },
+      { type: 'added', text: 'Dual ESM and CommonJS module exports' },
+      { type: 'added', text: 'Comprehensive test suite (302 tests)' },
+      { type: 'added', text: 'GitHub Actions CI/CD pipeline' },
+      { type: 'security', text: 'Not affected by CVE-2022-3517 (ReDoS)' },
+      { type: 'security', text: 'Limits on brace expansion to prevent DoS' },
+    ]
+  }
+];
+
+const typeLabels: Record<string, string> = {
+  added: 'Added',
+  changed: 'Changed',
+  security: 'Security',
+  fixed: 'Fixed',
+  removed: 'Removed'
+};
+---
+
+<section class="changelog" id="changelog">
+  <div class="container">
+    <div class="section-header">
+      <h2>Changelog</h2>
+      <p>Project evolution and version history</p>
+    </div>
+
+    <div class="timeline">
+      {versions.map((v, index) => (
+        <div class="timeline-item">
+          <div class="timeline-marker">
+            <div class="timeline-dot" />
+            {index < versions.length - 1 && <div class="timeline-line" />}
+          </div>
+
+          <div class="timeline-content">
+            <div class="version-header">
+              <div class="version-info">
+                <span class="version-number">v{v.version}</span>
+                {v.tag && <span class="version-tag">{v.tag}</span>}
+              </div>
+              <span class="version-date">{v.date}</span>
+            </div>
+
+            {v.performance && (
+              <div class="version-performance">
+                <strong>{v.performance}</strong>
+              </div>
+            )}
+
+            <div class="version-highlights">
+              {v.highlights.map(h => (
+                <span class="highlight-badge">{h}</span>
+              ))}
+            </div>
+
+            <ul class="version-changes">
+              {v.changes.map(change => (
+                <li class={`change-${change.type}`}>
+                  <span class="change-type">{typeLabels[change.type]}</span>
+                  {change.text}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .changelog {
+    padding: 5rem 0;
+  }
+
+  .timeline {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .timeline-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .timeline-dot {
+    width: 16px;
+    height: 16px;
+    background-color: var(--black);
+    border-radius: 50%;
+    border: 3px solid var(--white);
+    box-shadow: 0 0 0 2px var(--black);
+  }
+
+  .timeline-line {
+    width: 2px;
+    flex: 1;
+    background-color: var(--gray-300);
+    margin-top: 0.5rem;
+  }
+
+  .timeline-content {
+    flex: 1;
+    padding-bottom: 3rem;
+  }
+
+  .timeline-item:last-child .timeline-content {
+    padding-bottom: 0;
+  }
+
+  .version-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .version-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .version-number {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .version-tag {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: var(--black);
+    color: var(--white);
+    border-radius: 9999px;
+  }
+
+  .version-date {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+  }
+
+  .version-performance {
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--gray-100);
+    border: 1px solid var(--black);
+    border-radius: 6px;
+    display: inline-block;
+    font-size: 0.875rem;
+  }
+
+  .version-highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .highlight-badge {
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+  }
+
+  .version-changes {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .version-changes li {
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .version-changes li:last-child {
+    border-bottom: none;
+  }
+
+  .change-type {
+    flex-shrink: 0;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+    background-color: var(--gray-200);
+    color: var(--gray-700);
+  }
+
+  .change-added .change-type {
+    background-color: var(--gray-800);
+    color: var(--white);
+  }
+
+  .change-security .change-type {
+    background-color: var(--black);
+    color: var(--white);
+  }
+
+  .change-changed .change-type {
+    background-color: var(--gray-300);
+    color: var(--black);
+  }
+
+  @media (max-width: 768px) {
+    .timeline-item {
+      gap: 1rem;
+    }
+
+    .version-number {
+      font-size: 1.25rem;
+    }
+
+    .version-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
