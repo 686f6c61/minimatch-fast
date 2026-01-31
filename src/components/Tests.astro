@@ -5,7 +5,7 @@ import CodeBlock from './CodeBlock.astro';
 const testCategories = [
   { name: 'Unit Tests', count: 42, description: 'Core functionality tests' },
   { name: 'Compatibility Tests', count: 196, description: 'Behavior parity with minimatch' },
-  { name: 'Edge Case Tests', count: 42, description: 'Windows paths, dotfiles, negation' },
+  { name: 'Edge Case Tests', count: 64, description: 'Windows paths, extended options, dotfiles' },
   { name: 'Security Tests', count: 23, description: 'CVE-2022-3517 and input validation tests' },
   { name: 'Verification Tests', count: 53, description: 'POSIX classes, Unicode, regex edge cases' },
 ];
@@ -43,7 +43,7 @@ npm run test:compat`;
     </div>
 
     <div class="test-details">
-      <h3>356 Tests Total</h3>
+      <h3>378 Tests Total</h3>
       <p>
         Every release is verified against the original minimatch test suite plus
         additional tests for edge cases, Windows paths, and security vulnerabilities.

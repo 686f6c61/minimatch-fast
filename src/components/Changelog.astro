@@ -1,9 +1,28 @@
 ---
 const versions = [
   {
-    version: '0.2.3',
+    version: '0.3.0',
     date: '01/02/2026',
     tag: 'Current',
+    highlights: [
+      '15 new picomatch options',
+      'Callback support',
+      'Better error messages',
+      '378 tests'
+    ],
+    changes: [
+      { type: 'added', text: 'Extended picomatch options: ignore, failglob, maxLength, expandRange, bash, contains, format, flags' },
+      { type: 'added', text: 'Bracket options: strictBrackets, literalBrackets, keepQuotes, unescape' },
+      { type: 'added', text: 'Callback options: onMatch, onIgnore, onResult' },
+      { type: 'changed', text: 'Improved maxLength error messages with pattern length and limit details' },
+      { type: 'changed', text: 'failglob now shows how many paths were searched' },
+      { type: 'security', text: 'maxLength now validates for positive finite numbers' },
+      { type: 'added', text: '22 new tests for extended options' },
+    ]
+  },
+  {
+    version: '0.2.3',
+    date: '01/02/2026',
     highlights: [
       'Input validation for path',
       'Clean code improvements',
