@@ -34,6 +34,8 @@ The key benefits are:
 | Character class (`[0-9]`) | Baseline | **7.3x faster** |
 | Negation patterns | Baseline | **6.5x faster** |
 | Pre-compiled class | Baseline | **1.5x faster** |
+| Cache (warm vs cold) | N/A | **12x faster** |
+| Fast-path (simple patterns) | Baseline | **6x faster** |
 | CVE-2022-3517 (ReDoS) | Affected | **Not affected** |
 | Freezes on `{1..1000}` | Yes | **No** |
 | Engine | regex-based | picomatch + cache |
