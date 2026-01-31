@@ -1,0 +1,194 @@
+---
+import GitHub from './icons/GitHub.astro';
+import Menu from './icons/Menu.astro';
+import Close from './icons/Close.astro';
+
+const navLinks = [
+  { href: '#features', label: 'Why' },
+  { href: '#benchmarks', label: 'Benchmarks' },
+  { href: '#install', label: 'Install' },
+  { href: '#api', label: 'API' },
+  { href: '#options', label: 'Options' },
+];
+---
+
+<header class="header">
+  <div class="container">
+    <nav class="nav">
+      <a href="/" class="logo">
+        <span class="logo-text">minimatch-fast</span>
+      </a>
+
+      <ul class="nav-links" id="nav-links">
+        {navLinks.map(link => (
+          <li>
+            <a href={link.href} class="nav-link">{link.label}</a>
+          </li>
+        ))}
+        <li>
+          <a
+            href="https://github.com/686f6c61/minimatch-fast"
+            class="nav-link nav-github"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <GitHub size={20} />
+            <span class="sr-only">GitHub</span>
+          </a>
+        </li>
+      </ul>
+
+      <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <Menu class="menu-icon" />
+        <Close class="close-icon" />
+      </button>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--header-height);
+  }
+
+  .logo {
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.125rem;
+    font-family: var(--font-mono);
+  }
+
+  .logo-text {
+    color: var(--black);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--gray-600);
+    transition: color 0.15s ease;
+  }
+
+  .nav-link:hover {
+    color: var(--black);
+  }
+
+  .nav-github {
+    display: flex;
+    align-items: center;
+    color: var(--black);
+  }
+
+  .menu-toggle {
+    display: none;
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .close-icon {
+    display: none;
+  }
+
+  /* Mobile styles */
+  @media (max-width: 768px) {
+    .menu-toggle {
+      display: flex;
+    }
+
+    .nav-links {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      right: 0;
+      bottom: 0;
+      flex-direction: column;
+      gap: 0;
+      padding: 1rem 0;
+      background-color: var(--white);
+      border-top: 1px solid var(--gray-200);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .nav-links.open {
+      transform: translateX(0);
+    }
+
+    .nav-links li {
+      width: 100%;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+    }
+
+    .nav-link:hover {
+      background-color: var(--gray-50);
+    }
+
+    .nav-github {
+      justify-content: flex-start;
+      gap: 0.5rem;
+    }
+
+    .nav-github .sr-only {
+      position: static;
+      width: auto;
+      height: auto;
+      clip: auto;
+    }
+
+    /* Toggle icon visibility */
+    .menu-toggle[aria-expanded="true"] .menu-icon {
+      display: none;
+    }
+
+    .menu-toggle[aria-expanded="true"] .close-icon {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  const menuToggle = document.getElementById('menu-toggle');
+  const navLinks = document.getElementById('nav-links');
+
+  menuToggle?.addEventListener('click', () => {
+    const isOpen = menuToggle.getAttribute('aria-expanded') === 'true';
+    menuToggle.setAttribute('aria-expanded', (!isOpen).toString());
+    navLinks?.classList.toggle('open');
+  });
+
+  // Close menu when clicking a link
+  navLinks?.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      menuToggle?.setAttribute('aria-expanded', 'false');
+      navLinks.classList.remove('open');
+    });
+  });
+</script>

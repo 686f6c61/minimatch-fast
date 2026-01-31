@@ -1,0 +1,150 @@
+---
+const patterns = [
+  { pattern: '*', description: 'Match any characters except path separators', example: '*.js matches foo.js, bar.js' },
+  { pattern: '**', description: 'Match any characters including path separators (globstar)', example: '**/*.js matches src/foo.js, a/b/c.js' },
+  { pattern: '?', description: 'Match exactly one character (except path separator)', example: '?.js matches a.js, b.js' },
+  { pattern: '[abc]', description: 'Match any character in the set', example: '[abc].js matches a.js, b.js, c.js' },
+  { pattern: '[a-z]', description: 'Match any character in the range', example: '[a-z].js matches a.js through z.js' },
+  { pattern: '[!abc]', description: 'Match any character NOT in the set', example: '[!a].js matches b.js, c.js (not a.js)' },
+  { pattern: '{a,b,c}', description: 'Match any of the comma-separated patterns', example: '{foo,bar}.js matches foo.js, bar.js' },
+  { pattern: '{1..5}', description: 'Match numeric range', example: 'file{1..3}.js matches file1.js, file2.js, file3.js' },
+  { pattern: '{a..c}', description: 'Match alphabetic range', example: '{a..c}.js matches a.js, b.js, c.js' },
+  { pattern: '!pattern', description: 'Negate the match', example: '!*.min.js excludes minified files' },
+  { pattern: '?(a|b)', description: 'Match zero or one of the patterns', example: '?(foo).js matches .js, foo.js' },
+  { pattern: '*(a|b)', description: 'Match zero or more of the patterns', example: '*(a|b).js matches .js, a.js, ab.js, aab.js' },
+  { pattern: '+(a|b)', description: 'Match one or more of the patterns', example: '+(a|b).js matches a.js, ab.js, aab.js' },
+  { pattern: '@(a|b)', description: 'Match exactly one of the patterns', example: '@(foo|bar).js matches foo.js, bar.js' },
+];
+
+const posixClasses = [
+  { pattern: '[[:alpha:]]', description: 'Alphabetic characters (a-z, A-Z)', example: '[[:alpha:]]*.txt matches file.txt' },
+  { pattern: '[[:digit:]]', description: 'Numeric digits (0-9)', example: 'file[[:digit:]].js matches file1.js' },
+  { pattern: '[[:alnum:]]', description: 'Alphanumeric (letters and digits)', example: '[[:alnum:]] matches a, Z, 5' },
+  { pattern: '[[:space:]]', description: 'Whitespace characters', example: '[[:space:]] matches space, tab' },
+  { pattern: '[[:upper:]]', description: 'Uppercase letters', example: '[[:upper:]] matches A but not a' },
+  { pattern: '[[:lower:]]', description: 'Lowercase letters', example: '[[:lower:]] matches a but not A' },
+  { pattern: '[[:xdigit:]]', description: 'Hexadecimal digits (0-9, a-f, A-F)', example: '[[:xdigit:]] matches 0, a, F' },
+];
+
+const unicodeExamples = [
+  { pattern: '*.txt', description: 'Full Unicode support in filenames', example: 'café.txt, 文件.txt, ファイル.txt' },
+  { pattern: '文件夹/*.js', description: 'Unicode in patterns', example: '文件夹/test.js matches' },
+  { pattern: '{🎉,🎊}.txt', description: 'Emoji support', example: '🎉.txt, 🎊.txt' },
+];
+---
+
+<section class="patterns" id="patterns">
+  <div class="container">
+    <div class="section-header">
+      <h2>Glob Pattern Reference</h2>
+      <p>Complete guide to glob pattern syntax</p>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Pattern</th>
+            <th>Description</th>
+            <th>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          {patterns.map(p => (
+            <tr>
+              <td><code>{p.pattern}</code></td>
+              <td>{p.description}</td>
+              <td class="example-cell"><code>{p.example}</code></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="subsection">
+      <h3>POSIX Character Classes</h3>
+      <p>Full support for POSIX bracket expressions</p>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Description</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            {posixClasses.map(p => (
+              <tr>
+                <td><code>{p.pattern}</code></td>
+                <td>{p.description}</td>
+                <td class="example-cell"><code>{p.example}</code></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3>Unicode Support</h3>
+      <p>Full Unicode and emoji support in patterns and filenames</p>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Description</th>
+              <th>Matches</th>
+            </tr>
+          </thead>
+          <tbody>
+            {unicodeExamples.map(p => (
+              <tr>
+                <td><code>{p.pattern}</code></td>
+                <td>{p.description}</td>
+                <td class="example-cell"><code>{p.example}</code></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .patterns {
+    padding: 5rem 0;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 800px;
+  }
+
+  .example-cell {
+    font-size: 0.8125rem;
+  }
+
+  .example-cell code {
+    white-space: nowrap;
+  }
+
+  .subsection {
+    margin-top: 3rem;
+  }
+
+  .subsection h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .subsection > p {
+    color: var(--gray-600);
+    margin-bottom: 1rem;
+  }
+</style>

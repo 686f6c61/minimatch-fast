@@ -1,0 +1,83 @@
+---
+const options = [
+  { name: 'dot', type: 'boolean', default: 'false', description: 'Match dotfiles (files starting with .). By default, * and ? do not match leading dots.' },
+  { name: 'nocase', type: 'boolean', default: 'false', description: 'Perform case-insensitive matching.' },
+  { name: 'nonegate', type: 'boolean', default: 'false', description: 'Suppress negation behavior with leading !.' },
+  { name: 'nobrace', type: 'boolean', default: 'false', description: 'Do not expand brace patterns like {a,b,c}.' },
+  { name: 'noext', type: 'boolean', default: 'false', description: 'Disable extglob patterns like ?(a|b), *(a|b), etc.' },
+  { name: 'noglobstar', type: 'boolean', default: 'false', description: 'Disable ** matching across directory boundaries.' },
+  { name: 'nocomment', type: 'boolean', default: 'false', description: 'Suppress treating # as a comment character.' },
+  { name: 'matchBase', type: 'boolean', default: 'false', description: 'If pattern has no slashes, match basename of the path. foo matches bar/baz/foo.' },
+  { name: 'partial', type: 'boolean', default: 'false', description: 'Partial match: pattern can match a portion of the path.' },
+  { name: 'flipNegate', type: 'boolean', default: 'false', description: 'Returns true for negated patterns that do not match.' },
+  { name: 'preserveMultipleSlashes', type: 'boolean', default: 'false', description: 'Do not collapse multiple slashes (a//b stays as a//b).' },
+  { name: 'optimizationLevel', type: 'number', default: '1', description: 'Regex optimization level: 0 = none, 1 = safe (default), 2 = aggressive.' },
+  { name: 'platform', type: 'string', default: 'process.platform', description: 'Platform for path handling: "win32", "darwin", "linux", etc.' },
+  { name: 'windowsPathsNoEscape', type: 'boolean', default: 'false', description: 'On Windows, treat \\ as path separator, not escape character.' },
+  { name: 'allowWindowsEscape', type: 'boolean', default: 'platform !== "win32"', description: 'Allow \\ as escape character on Windows.' },
+  { name: 'nocaseMagicOnly', type: 'boolean', default: 'false', description: 'Only apply nocase to magic portions of the pattern.' },
+  { name: 'magicalBraces', type: 'boolean', default: 'false', description: 'Treat brace expansion as magic (affects hasMagic()).' },
+  { name: 'debug', type: 'boolean', default: 'false', description: 'Enable debug output.' },
+];
+---
+
+<section class="options" id="options">
+  <div class="container">
+    <div class="section-header">
+      <h2>Options</h2>
+      <p>Configuration options for fine-tuning pattern matching</p>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Option</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {options.map(opt => (
+            <tr>
+              <td><code>{opt.name}</code></td>
+              <td class="type-cell"><code>{opt.type}</code></td>
+              <td class="default-cell"><code>{opt.default}</code></td>
+              <td class="desc-cell">{opt.description}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<style>
+  .options {
+    padding: 5rem 0;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 900px;
+  }
+
+  .type-cell,
+  .default-cell {
+    white-space: nowrap;
+  }
+
+  .type-cell code,
+  .default-cell code {
+    font-size: 0.75rem;
+  }
+
+  .desc-cell {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+  }
+</style>

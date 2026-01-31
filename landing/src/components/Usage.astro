@@ -1,0 +1,134 @@
+---
+import CodeBlock from './CodeBlock.astro';
+
+const basicExample = `import minimatch from 'minimatch-fast';
+
+// Basic matching
+minimatch('foo.js', '*.js');    // true
+minimatch('bar.txt', '*.js');   // false
+
+// Globstar (recursive)
+minimatch('src/utils/helpers.js', '**/*.js');  // true
+minimatch('test/foo/bar.spec.ts', '**/*.ts');  // true`;
+
+const matchArrayExample = `import { minimatch } from 'minimatch-fast';
+
+const files = ['foo.js', 'bar.js', 'baz.txt', 'qux.md'];
+
+// Match array of files
+minimatch.match(files, '*.js');
+// => ['foo.js', 'bar.js']
+
+minimatch.match(files, '*.{js,md}');
+// => ['foo.js', 'bar.js', 'qux.md']`;
+
+const filterExample = `import { minimatch } from 'minimatch-fast';
+
+const files = ['src/index.js', 'src/utils.js', 'test/foo.spec.js'];
+
+// Create a filter function
+const isSource = minimatch.filter('src/**/*.js');
+
+files.filter(isSource);
+// => ['src/index.js', 'src/utils.js']`;
+
+const classExample = `import { Minimatch } from 'minimatch-fast';
+
+// Pre-compile pattern for repeated matching
+const mm = new Minimatch('**/*.js', { dot: true });
+
+// Match multiple files efficiently
+mm.match('src/index.js');     // true
+mm.match('.eslintrc.js');     // true (dot: true)
+mm.match('README.md');        // false
+
+// Access the compiled regex
+console.log(mm.regexp);       // /^(?:(?!...)...$/`;
+
+const braceExample = `import { minimatch } from 'minimatch-fast';
+
+// Brace expansion
+minimatch.braceExpand('{a,b,c}');
+// => ['a', 'b', 'c']
+
+minimatch.braceExpand('{1..5}');
+// => ['1', '2', '3', '4', '5']
+
+minimatch.braceExpand('file{A,B}.{js,ts}');
+// => ['fileA.js', 'fileA.ts', 'fileB.js', 'fileB.ts']`;
+
+const escapeExample = `import { minimatch } from 'minimatch-fast';
+
+// Escape special characters
+minimatch.escape('[foo].js');
+// => '\\\\[foo\\\\].js'
+
+// Unescape
+minimatch.unescape('\\\\[foo\\\\].js');
+// => '[foo].js'`;
+---
+
+<section class="usage" id="usage">
+  <div class="container">
+    <div class="section-header">
+      <h2>Usage Examples</h2>
+      <p>Common patterns and use cases</p>
+    </div>
+
+    <div class="examples-grid">
+      <div class="example">
+        <h3>Basic Matching</h3>
+        <CodeBlock lang="javascript" code={basicExample} />
+      </div>
+
+      <div class="example">
+        <h3>Match Array</h3>
+        <CodeBlock lang="javascript" code={matchArrayExample} />
+      </div>
+
+      <div class="example">
+        <h3>Filter Function</h3>
+        <CodeBlock lang="javascript" code={filterExample} />
+      </div>
+
+      <div class="example">
+        <h3>Minimatch Class</h3>
+        <CodeBlock lang="javascript" code={classExample} />
+      </div>
+
+      <div class="example">
+        <h3>Brace Expansion</h3>
+        <CodeBlock lang="javascript" code={braceExample} />
+      </div>
+
+      <div class="example">
+        <h3>Escape / Unescape</h3>
+        <CodeBlock lang="javascript" code={escapeExample} />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .usage {
+    padding: 5rem 0;
+    background-color: var(--gray-50);
+  }
+
+  .examples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 2rem;
+  }
+
+  .example h3 {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .examples-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

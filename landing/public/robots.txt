@@ -1,0 +1,6 @@
+# robots.txt for minimatch-fast
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://minimatch-fast.onrender.com/sitemap.xml

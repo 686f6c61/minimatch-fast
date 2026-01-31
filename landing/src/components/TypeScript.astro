@@ -1,0 +1,101 @@
+---
+import CodeBlock from './CodeBlock.astro';
+
+const tsExample = `import minimatch, {
+  Minimatch,
+  MinimatchOptions,
+  MMRegExp
+} from 'minimatch-fast';
+
+// Options with full type support
+const options: MinimatchOptions = {
+  dot: true,
+  nocase: true,
+  noglobstar: false
+};
+
+// Basic matching
+const matches: boolean = minimatch('foo.js', '*.js', options);
+
+// Minimatch class
+const mm: Minimatch = new Minimatch('**/*.ts', options);
+const isMatch: boolean = mm.match('src/index.ts');
+
+// Get the compiled regex
+const regex: MMRegExp | false = mm.makeRe();
+
+// Filter function
+const filter: (p: string) => boolean = minimatch.filter('*.js');
+
+// Match array
+const files: string[] = minimatch.match(['a.js', 'b.ts'], '*.js');
+
+// Brace expansion
+const expanded: string[] = minimatch.braceExpand('{a,b,c}');`;
+---
+
+<section class="typescript" id="typescript">
+  <div class="container">
+    <div class="section-header">
+      <h2>TypeScript Support</h2>
+      <p>Full type definitions included</p>
+    </div>
+
+    <div class="ts-content">
+      <p>
+        minimatch-fast ships with complete TypeScript definitions. All types are exported
+        and ready to use without installing separate <code>@types</code> packages.
+      </p>
+
+      <CodeBlock lang="typescript" code={tsExample} />
+
+      <h3>Exported Types</h3>
+      <ul class="type-list">
+        <li><code>minimatch</code> - The main function</li>
+        <li><code>Minimatch</code> - The Minimatch class</li>
+        <li><code>MinimatchOptions</code> - Configuration options interface</li>
+        <li><code>MMRegExp</code> - Extended RegExp with index info</li>
+        <li><code>ParseReturn</code> - Type for parsed pattern segments</li>
+        <li><code>AST</code> - Type for the abstract syntax tree</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .typescript {
+    padding: 5rem 0;
+  }
+
+  .ts-content {
+    max-width: 800px;
+  }
+
+  .ts-content > p {
+    color: var(--gray-600);
+    margin-bottom: 2rem;
+  }
+
+  .ts-content h3 {
+    font-size: 1.125rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .type-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .type-list li {
+    padding: 0.5rem 0;
+    color: var(--gray-600);
+  }
+
+  .type-list code {
+    margin-right: 0.5rem;
+  }
+</style>

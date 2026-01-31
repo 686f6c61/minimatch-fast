@@ -1,0 +1,258 @@
+---
+import CodeBlock from './CodeBlock.astro';
+import Arrow from './icons/Arrow.astro';
+
+const apiMethods = [
+  {
+    name: 'minimatch(path, pattern, [options])',
+    description: 'Test a path against a pattern. Returns true if the path matches.',
+    params: [
+      { name: 'path', type: 'string', desc: 'The path to test' },
+      { name: 'pattern', type: 'string', desc: 'The glob pattern' },
+      { name: 'options', type: 'MinimatchOptions', desc: 'Optional configuration' },
+    ],
+    returns: 'boolean',
+    example: `minimatch('foo.js', '*.js'); // true
+minimatch('foo/bar.js', '**/*.js'); // true`,
+  },
+  {
+    name: 'minimatch.match(list, pattern, [options])',
+    description: 'Filter an array of paths, returning those that match the pattern.',
+    params: [
+      { name: 'list', type: 'string[]', desc: 'Array of paths to filter' },
+      { name: 'pattern', type: 'string', desc: 'The glob pattern' },
+      { name: 'options', type: 'MinimatchOptions', desc: 'Optional configuration' },
+    ],
+    returns: 'string[]',
+    example: `const files = ['a.js', 'b.ts', 'c.js'];
+minimatch.match(files, '*.js');
+// => ['a.js', 'c.js']`,
+  },
+  {
+    name: 'minimatch.filter(pattern, [options])',
+    description: 'Create a filter function for use with Array.filter().',
+    params: [
+      { name: 'pattern', type: 'string', desc: 'The glob pattern' },
+      { name: 'options', type: 'MinimatchOptions', desc: 'Optional configuration' },
+    ],
+    returns: '(path: string) => boolean',
+    example: `const isJS = minimatch.filter('*.js');
+['a.js', 'b.ts'].filter(isJS);
+// => ['a.js']`,
+  },
+  {
+    name: 'minimatch.makeRe(pattern, [options])',
+    description: 'Create a regular expression from the pattern.',
+    params: [
+      { name: 'pattern', type: 'string', desc: 'The glob pattern' },
+      { name: 'options', type: 'MinimatchOptions', desc: 'Optional configuration' },
+    ],
+    returns: 'RegExp | false',
+    example: `minimatch.makeRe('*.js');
+// => /^(?:(?!\\.)...)\\.js$/`,
+  },
+  {
+    name: 'minimatch.braceExpand(pattern, [options])',
+    description: 'Expand brace patterns into an array of patterns.',
+    params: [
+      { name: 'pattern', type: 'string', desc: 'Pattern with braces' },
+      { name: 'options', type: 'MinimatchOptions', desc: 'Optional configuration' },
+    ],
+    returns: 'string[]',
+    example: `minimatch.braceExpand('{a,b}{1,2}');
+// => ['a1', 'a2', 'b1', 'b2']`,
+  },
+  {
+    name: 'minimatch.escape(str, [options])',
+    description: 'Escape special glob characters in a string.',
+    params: [
+      { name: 'str', type: 'string', desc: 'String to escape' },
+      { name: 'options', type: '{ windowsPathsNoEscape?: boolean }', desc: 'Optional configuration' },
+    ],
+    returns: 'string',
+    example: `minimatch.escape('[foo].js');
+// => '\\\\[foo\\\\].js'`,
+  },
+  {
+    name: 'minimatch.unescape(str, [options])',
+    description: 'Remove escape characters from a string.',
+    params: [
+      { name: 'str', type: 'string', desc: 'String to unescape' },
+      { name: 'options', type: '{ windowsPathsNoEscape?: boolean }', desc: 'Optional configuration' },
+    ],
+    returns: 'string',
+    example: `minimatch.unescape('\\\\[foo\\\\].js');
+// => '[foo].js'`,
+  },
+  {
+    name: 'minimatch.defaults(options)',
+    description: 'Create a new minimatch function with default options.',
+    params: [
+      { name: 'options', type: 'MinimatchOptions', desc: 'Default options to apply' },
+    ],
+    returns: 'typeof minimatch',
+    example: `const mm = minimatch.defaults({ nocase: true });
+mm('FOO.js', '*.js'); // true`,
+  },
+  {
+    name: 'new Minimatch(pattern, [options])',
+    description: 'Create a reusable matcher for a pattern. More efficient when matching the same pattern against multiple paths.',
+    params: [
+      { name: 'pattern', type: 'string', desc: 'The glob pattern' },
+      { name: 'options', type: 'MinimatchOptions', desc: 'Optional configuration' },
+    ],
+    returns: 'Minimatch',
+    example: `const mm = new Minimatch('**/*.js');
+mm.match('src/foo.js'); // true
+mm.match('test/bar.js'); // true`,
+  },
+];
+---
+
+<section class="api" id="api">
+  <div class="container">
+    <div class="section-header">
+      <h2>API Reference</h2>
+      <p>Complete API documentation</p>
+    </div>
+
+    <div class="api-list">
+      {apiMethods.map((method, index) => (
+        <details class="api-item" id={`api-${index}`}>
+          <summary class="api-summary">
+            <code class="api-name">{method.name}</code>
+            <Arrow size={16} direction="down" class="api-arrow" />
+          </summary>
+          <div class="api-content">
+            <p class="api-description">{method.description}</p>
+
+            <h4>Parameters</h4>
+            <ul class="api-params">
+              {method.params.map(param => (
+                <li>
+                  <code>{param.name}</code>
+                  <span class="param-type">{param.type}</span>
+                  <span class="param-desc">{param.desc}</span>
+                </li>
+              ))}
+            </ul>
+
+            <h4>Returns</h4>
+            <p><code>{method.returns}</code></p>
+
+            <h4>Example</h4>
+            <CodeBlock lang="javascript" code={method.example} showCopy={false} />
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .api {
+    padding: 5rem 0;
+    background-color: var(--gray-50);
+  }
+
+  .api-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .api-item {
+    background-color: var(--white);
+    border: 1px solid var(--black);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .api-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .api-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .api-summary:hover {
+    background-color: var(--gray-50);
+  }
+
+  .api-name {
+    font-size: 0.9375rem;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  .api-arrow {
+    transition: transform 0.2s ease;
+  }
+
+  details[open] .api-arrow {
+    transform: rotate(180deg);
+  }
+
+  .api-content {
+    padding: 0 1.5rem 1.5rem;
+    border-top: 1px solid var(--gray-200);
+  }
+
+  .api-description {
+    margin-top: 1rem;
+    color: var(--gray-600);
+  }
+
+  .api-content h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .api-params {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .api-params li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .api-params li:last-child {
+    border-bottom: none;
+  }
+
+  .param-type {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--gray-500);
+  }
+
+  .param-desc {
+    color: var(--gray-600);
+    font-size: 0.875rem;
+  }
+
+  @media (max-width: 768px) {
+    .api-name {
+      font-size: 0.8125rem;
+    }
+  }
+</style>
