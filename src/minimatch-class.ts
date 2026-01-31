@@ -51,9 +51,9 @@ import {
 } from './utils.js';
 
 /**
- * Maximum pattern length to prevent ReDoS attacks
+ * Default maximum pattern length to prevent ReDoS attacks
  */
-const MAX_PATTERN_LENGTH = 65536;
+const DEFAULT_MAX_PATTERN_LENGTH = 65536;
 
 /**
  * Minimatch class for glob pattern matching
@@ -132,9 +132,19 @@ export class Minimatch {
       throw new TypeError('glob pattern must be a string');
     }
 
-    // Prevent ReDoS attacks with very long patterns
-    if (pattern.length > MAX_PATTERN_LENGTH) {
-      throw new TypeError('pattern is too long');
+    // Validate and apply maxLength option
+    const maxLength = options.maxLength ?? DEFAULT_MAX_PATTERN_LENGTH;
+    if (typeof maxLength !== 'number' || !Number.isFinite(maxLength) || maxLength < 1) {
+      throw new TypeError(
+        `options.maxLength must be a positive finite number, got: ${maxLength}`
+      );
+    }
+    if (pattern.length > maxLength) {
+      throw new TypeError(
+        `Pattern length ${pattern.length} exceeds maximum ${maxLength}. ` +
+        `This limit exists to prevent ReDoS attacks. ` +
+        `Use options.maxLength to increase if needed.`
+      );
     }
 
     // Store options

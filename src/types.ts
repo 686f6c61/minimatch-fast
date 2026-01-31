@@ -52,6 +52,16 @@ export type ParseReturnFiltered = string | MMRegExp | GlobstarSymbol;
 export type ParseReturn = ParseReturnFiltered | false;
 
 /**
+ * Result object passed to onMatch, onIgnore, and onResult callbacks
+ * Compatible with picomatch's callback result type
+ */
+export interface MatchResult {
+  isMatch: boolean;
+  match?: string;
+  output: string;
+}
+
+/**
  * Options for minimatch functions
  * All options are optional and default to false unless otherwise specified
  */
@@ -191,6 +201,112 @@ export interface MinimatchOptions {
    * @default false on non-Windows, true on Windows with nocase
    */
   windowsNoMagicRoot?: boolean;
+
+  // =========================================================================
+  // Extended picomatch options (not in original minimatch)
+  // =========================================================================
+
+  /**
+   * Patterns to exclude from matching
+   * Can be a string or array of glob patterns
+   * @default undefined
+   */
+  ignore?: string | string[];
+
+  /**
+   * Throw an error if no matches are found
+   * Only applies to minimatch.match()
+   * @default false
+   */
+  failglob?: boolean;
+
+  /**
+   * Maximum length of the input pattern
+   * Patterns longer than this will throw a TypeError
+   * @default 65536
+   */
+  maxLength?: number;
+
+  /**
+   * Custom function for expanding ranges in brace patterns
+   * Receives the range values as two arguments (e.g., 'a', 'z' for {a..z})
+   * Must return a string to be used in the generated regex
+   * @example (a, b) => `(${fillRange(a, b, { toRegex: true })})`
+   */
+  expandRange?: (a: string, b: string) => string;
+
+  /**
+   * Follow bash matching rules more strictly
+   * Disallows backslashes as escape characters and treats single stars as globstars
+   * @default false
+   */
+  bash?: boolean;
+
+  /**
+   * Allow glob to match any part of the given string
+   * By default, the pattern must match the entire string
+   * @default false
+   */
+  contains?: boolean;
+
+  /**
+   * Custom function for formatting strings before matching
+   * Useful for removing leading slashes, converting Windows paths, etc.
+   * @example (str) => str.replace(/^\.\//, '')
+   */
+  format?: (str: string) => string;
+
+  /**
+   * Regex flags to use in the generated regex
+   * If defined, the nocase option will be overridden
+   * @example 'gi'
+   */
+  flags?: string;
+
+  /**
+   * Function to be called on matched items
+   * Receives match result object with glob, regex, input, output
+   */
+  onMatch?: (result: MatchResult) => void;
+
+  /**
+   * Function to be called on ignored items
+   * Receives match result object with glob, regex, input, output
+   */
+  onIgnore?: (result: MatchResult) => void;
+
+  /**
+   * Function to be called on all items, regardless of match status
+   * Receives match result object with glob, regex, input, output
+   */
+  onResult?: (result: MatchResult) => void;
+
+  /**
+   * Throw an error if brackets, braces, or parens are imbalanced
+   * @default false
+   */
+  strictBrackets?: boolean;
+
+  /**
+   * When true, brackets in the glob pattern will be escaped
+   * so that only literal brackets will be matched
+   * @default false
+   */
+  literalBrackets?: boolean;
+
+  /**
+   * Retain quotes in the generated regex
+   * Quotes may also be used as an alternative to backslashes
+   * @default false
+   */
+  keepQuotes?: boolean;
+
+  /**
+   * Remove backslashes preceding escaped characters in the glob pattern
+   * By default, backslashes are retained
+   * @default false
+   */
+  unescape?: boolean;
 }
 
 /**
@@ -211,5 +327,17 @@ export interface PicomatchOptions {
   matchBase?: boolean;
   posixSlashes?: boolean;
   expandRange?: (a: string, b: string) => string;
+  // Extended options
+  ignore?: string | string[];
+  maxLength?: number;
+  bash?: boolean;
+  format?: (str: string) => string;
+  onMatch?: (result: MatchResult) => void;
+  onIgnore?: (result: MatchResult) => void;
+  onResult?: (result: MatchResult) => void;
+  strictBrackets?: boolean;
+  literalBrackets?: boolean;
+  keepQuotes?: boolean;
+  unescape?: boolean;
 }
 

@@ -279,9 +279,18 @@ export function match(
   const mm = getOrCreateMatcher(pattern, options);
   const result = list.filter((f) => mm.match(f));
 
-  // If nonull option is set and no matches, return the pattern
-  if (mm.options.nonull && result.length === 0) {
-    return [pattern];
+  // Handle no matches case
+  if (result.length === 0) {
+    // failglob has precedence: throw error if enabled
+    if (options.failglob) {
+      throw new Error(
+        `No matches found for pattern: ${pattern} (searched ${list.length} paths)`
+      );
+    }
+    // nonull: return the pattern itself when no matches
+    if (mm.options.nonull) {
+      return [pattern];
+    }
   }
 
   return result;

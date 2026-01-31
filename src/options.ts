@@ -40,6 +40,22 @@ export function translateOptions(opts: MinimatchOptions = {}): { picoOpts: Picom
 
     // Force POSIX mode - we handle Windows paths manually via normalizePath
     posix: true,
+
+    // Extended picomatch options (new in v0.3.0)
+    ignore: opts.ignore,
+    maxLength: opts.maxLength,
+    expandRange: opts.expandRange,
+    bash: opts.bash,
+    contains: opts.contains,
+    format: opts.format,
+    flags: opts.flags,
+    onMatch: opts.onMatch,
+    onIgnore: opts.onIgnore,
+    onResult: opts.onResult,
+    strictBrackets: opts.strictBrackets,
+    literalBrackets: opts.literalBrackets,
+    keepQuotes: opts.keepQuotes,
+    unescape: opts.unescape,
   };
 
   return { picoOpts };

@@ -15,6 +15,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-02-01
+
+### Added
+
+- **Extended picomatch options**: 15 new options from picomatch now available
+  - `ignore`: Patterns to exclude from matching (string or array)
+  - `failglob`: Throw error if no matches found (takes precedence over `nonull`)
+  - `maxLength`: Configurable maximum pattern length (default: 65536)
+  - `expandRange`: Custom function for range expansion in braces
+  - `bash`: Follow bash matching rules more strictly
+  - `contains`: Match pattern anywhere in string
+  - `format`: Custom function for formatting strings before matching
+  - `flags`: Regex flags to use in generated regex
+  - `strictBrackets`: Throw on imbalanced brackets/braces/parens
+  - `literalBrackets`: Escape brackets to match literal characters
+  - `keepQuotes`: Retain quotes in generated regex
+  - `unescape`: Remove backslashes preceding escaped characters
+- **Callback options**: `onMatch`, `onIgnore`, `onResult` for pattern matching events
+- **Tests**: 22 new tests for extended options (378 total tests)
+
+### Changed
+
+- **Better error messages**: `maxLength` errors now show pattern length and limit details
+- **Improved failglob**: Error message now includes number of paths searched
+- **Validation**: `maxLength` now validates for positive finite numbers
+
+### Security
+
+- `maxLength` option now rejects invalid values (negative, NaN, Infinity)
+
 ## [0.2.3] - 2026-01-31
 
 ### Added

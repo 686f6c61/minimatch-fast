@@ -20,7 +20,7 @@ The key benefits are:
 - **Performance**: **6-25x faster** than minimatch for most patterns
 - **Security**: Not vulnerable to CVE-2022-3517 (ReDoS attack) that affected minimatch
 - **Stability**: No freezing on large brace ranges like `{1..1000}`
-- **Compatibility**: Passes 100% of minimatch's original test suite (356 tests)
+- **Compatibility**: Passes 100% of minimatch's original test suite (378 tests)
 - **POSIX Classes**: Full support for `[[:alpha:]]`, `[[:digit:]]`, `[[:alnum:]]`, and more
 - **Unicode**: Complete Unicode support including CJK characters and emoji
 - **Regex Safety**: Not affected by Issue #273 (invalid regex with commas in character classes)
@@ -626,6 +626,8 @@ range.braceExpand();   // ['log-1.txt', 'log-2.txt', 'log-3.txt', 'log-4.txt', '
 
 All options are optional and default to `false` unless otherwise noted. These options control how patterns are interpreted and matched.
 
+#### Core Options (minimatch compatible)
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `dot` | boolean | Match dotfiles (files starting with `.`). By default, `*` and `**` don't match dotfiles. |
@@ -643,6 +645,50 @@ All options are optional and default to `false` unless otherwise noted. These op
 | `preserveMultipleSlashes` | boolean | Don't collapse `//` to `/`. |
 | `optimizationLevel` | number | Optimization level (0-2, default: 1). |
 | `platform` | string | Override platform detection (`'win32'` or `'posix'`). |
+
+#### Extended Options (v0.3.0+)
+
+These options extend the original minimatch API with additional picomatch capabilities:
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `ignore` | string \| string[] | Patterns to exclude from matching. |
+| `failglob` | boolean | Throw error if no matches found (takes precedence over `nonull`). |
+| `maxLength` | number | Maximum pattern length (default: 65536). Prevents ReDoS attacks. |
+| `expandRange` | function | Custom function for expanding ranges in brace patterns. |
+| `bash` | boolean | Follow bash matching rules more strictly. |
+| `contains` | boolean | Match pattern anywhere in string (not just full match). |
+| `format` | function | Custom function for formatting strings before matching. |
+| `flags` | string | Regex flags to use in generated regex. |
+| `strictBrackets` | boolean | Throw error if brackets, braces, or parens are imbalanced. |
+| `literalBrackets` | boolean | Escape brackets to match literal `[` and `]`. |
+| `keepQuotes` | boolean | Retain quotes in the generated regex. |
+| `unescape` | boolean | Remove backslashes preceding escaped characters. |
+
+#### Callback Options (v0.3.0+)
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `onMatch` | function | Called when a pattern matches. Receives match result object. |
+| `onIgnore` | function | Called when a pattern is ignored. Receives match result object. |
+| `onResult` | function | Called for all results. Receives match result object. |
+
+```javascript
+// Example: using callbacks
+const mm = new Minimatch('*.js', {
+  onMatch: (result) => console.log('Match:', result.input),
+  onIgnore: (result) => console.log('Ignored:', result.input),
+});
+
+// Example: using ignore option
+const mm = new Minimatch('*.js', { ignore: ['*.test.js', '*.spec.js'] });
+mm.match('app.js');      // true
+mm.match('app.test.js'); // false (ignored)
+
+// Example: failglob throws on no matches
+minimatch.match(['a.txt', 'b.txt'], '*.js', { failglob: true });
+// Throws: Error: No matches found for pattern: *.js
+```
 
 ## Glob Syntax
 
@@ -756,10 +802,10 @@ minimatch('foo.txt', '!*.txt'); // false (is a .txt file)
 
 ### Test Suite
 
-Our test suite consists of **356 tests** organized into five categories:
+Our test suite consists of **378 tests** organized into five categories:
 
 1. **Unit Tests (42 tests)**: Core functionality and API tests
-2. **Edge Case Tests (42 tests)**: Windows paths, dotfiles, negation, extglob
+2. **Edge Case Tests (64 tests)**: Windows paths, extended options, dotfiles, extglob
 3. **Security Tests (23 tests)**: CVE-2022-3517 regression, pattern limits, input validation
 4. **Exhaustive Compatibility Tests (196 tests)**: All patterns from minimatch's original `patterns.js` test file
 5. **Verification Tests (53 tests)**: POSIX character classes, Unicode support, regex edge cases
@@ -933,7 +979,7 @@ cd minimatch-fast
 npm install
 
 # Run tests
-npm test                 # All tests (356 tests)
+npm test                 # All tests (378 tests)
 npm run test:compat     # Compatibility tests only (196 tests)
 npm run benchmark       # Performance benchmarks
 

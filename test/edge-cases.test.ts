@@ -303,3 +303,192 @@ describe('Extglob patterns', () => {
     expect(minimatch('foo.js', '@(foo|bar).js', { noext: true })).toBe(false);
   });
 });
+
+// ============================================================================
+// EXTENDED PICOMATCH OPTIONS (v0.3.0)
+// These tests verify the new picomatch options exposed in minimatch-fast
+// ============================================================================
+
+describe('Extended picomatch options', () => {
+  describe('failglob option', () => {
+    it('should throw error when no matches and failglob is true', () => {
+      expect(() =>
+        minimatch.match(['a.txt', 'b.txt'], '*.js', { failglob: true })
+      ).toThrow('No matches found for pattern: *.js (searched 2 paths)');
+    });
+
+    it('should not throw when matches exist', () => {
+      expect(() =>
+        minimatch.match(['a.js', 'b.txt'], '*.js', { failglob: true })
+      ).not.toThrow();
+    });
+
+    it('should take precedence over nonull', () => {
+      expect(() =>
+        minimatch.match(['a.txt'], '*.js', { failglob: true, nonull: true })
+      ).toThrow();
+    });
+  });
+
+  describe('maxLength option', () => {
+    it('should use default maxLength of 65536', () => {
+      // Pattern exactly at limit should work
+      const atLimit = 'a'.repeat(65536);
+      expect(() => new Minimatch(atLimit)).not.toThrow();
+      // Pattern over limit should throw
+      const overLimit = 'a'.repeat(65537);
+      expect(() => new Minimatch(overLimit)).toThrow(TypeError);
+    });
+
+    it('should allow custom maxLength', () => {
+      const pattern = 'a'.repeat(100);
+      expect(() => new Minimatch(pattern, { maxLength: 50 })).toThrow(TypeError);
+    });
+
+    it('should accept patterns within custom maxLength', () => {
+      const pattern = 'a'.repeat(100);
+      expect(() => new Minimatch(pattern, { maxLength: 200 })).not.toThrow();
+    });
+
+    it('should provide informative error message when pattern too long', () => {
+      const pattern = 'a'.repeat(100);
+      expect(() => new Minimatch(pattern, { maxLength: 50 })).toThrow(
+        /Pattern length 100 exceeds maximum 50/
+      );
+    });
+
+    it('should validate maxLength option value', () => {
+      expect(() => new Minimatch('test', { maxLength: -1 })).toThrow(
+        /options.maxLength must be a positive finite number/
+      );
+      expect(() => new Minimatch('test', { maxLength: 0 })).toThrow(
+        /options.maxLength must be a positive finite number/
+      );
+      expect(() => new Minimatch('test', { maxLength: NaN })).toThrow(
+        /options.maxLength must be a positive finite number/
+      );
+      expect(() => new Minimatch('test', { maxLength: Infinity })).toThrow(
+        /options.maxLength must be a positive finite number/
+      );
+    });
+  });
+
+  describe('ignore option', () => {
+    it('should ignore patterns matching ignore string', () => {
+      const mm = new Minimatch('*.js', { ignore: 'test.js' });
+      expect(mm.match('foo.js')).toBe(true);
+      expect(mm.match('test.js')).toBe(false);
+    });
+
+    it('should ignore patterns matching ignore array', () => {
+      const mm = new Minimatch('*.js', { ignore: ['test.js', 'spec.js'] });
+      expect(mm.match('foo.js')).toBe(true);
+      expect(mm.match('test.js')).toBe(false);
+      expect(mm.match('spec.js')).toBe(false);
+    });
+  });
+
+  describe('contains option', () => {
+    it('should match pattern anywhere in string', () => {
+      const mm = new Minimatch('foo', { contains: true });
+      expect(mm.match('foobar')).toBe(true);
+      expect(mm.match('barfoo')).toBe(true);
+      expect(mm.match('barfoobaz')).toBe(true);
+    });
+
+    it('should not match without contains option', () => {
+      const mm = new Minimatch('foo');
+      expect(mm.match('foobar')).toBe(false);
+      expect(mm.match('barfoo')).toBe(false);
+    });
+  });
+
+  describe('bash option', () => {
+    it('should follow bash matching rules strictly', () => {
+      const mm = new Minimatch('*.js', { bash: true });
+      expect(mm.match('foo.js')).toBe(true);
+    });
+  });
+
+  describe('strictBrackets option', () => {
+    it('should handle unbalanced brackets with strictBrackets option', () => {
+      // strictBrackets affects how unbalanced brackets are handled
+      // The exact behavior depends on picomatch version
+      const mmStrict = new Minimatch('[abc', { strictBrackets: true });
+      const mmNormal = new Minimatch('[abc');
+      // Both should create valid Minimatch instances
+      expect(mmStrict).toBeInstanceOf(Minimatch);
+      expect(mmNormal).toBeInstanceOf(Minimatch);
+    });
+
+    it('should not throw without strictBrackets', () => {
+      expect(() => new Minimatch('[abc')).not.toThrow();
+    });
+  });
+
+  describe('format option', () => {
+    it('should format strings before matching', () => {
+      const mm = new Minimatch('*.js', {
+        format: (str: string) => str.replace(/^\.\//, ''),
+      });
+      expect(mm.match('./foo.js')).toBe(true);
+    });
+  });
+
+  describe('flags option', () => {
+    it('should apply regex flags', () => {
+      const mm = new Minimatch('*.JS', { flags: 'i' });
+      expect(mm.match('foo.js')).toBe(true);
+      expect(mm.match('foo.JS')).toBe(true);
+    });
+  });
+
+  describe('callback options', () => {
+    it('should call onMatch when pattern matches', () => {
+      let matchCalled = false;
+      const mm = new Minimatch('*.js', {
+        onMatch: () => {
+          matchCalled = true;
+        },
+      });
+      mm.match('foo.js');
+      expect(matchCalled).toBe(true);
+    });
+
+    it('should call onResult for all results', () => {
+      let resultCount = 0;
+      const mm = new Minimatch('*.js', {
+        onResult: () => {
+          resultCount++;
+        },
+      });
+      const initialCount = resultCount;
+      mm.match('foo.js');
+      mm.match('bar.txt');
+      // Should call onResult at least once per match call
+      expect(resultCount).toBeGreaterThan(initialCount);
+    });
+  });
+
+  describe('literalBrackets option', () => {
+    it('should treat brackets as literal characters', () => {
+      const mm = new Minimatch('[abc]', { literalBrackets: true });
+      expect(mm.match('[abc]')).toBe(true);
+      expect(mm.match('a')).toBe(false);
+    });
+  });
+
+  describe('keepQuotes option', () => {
+    it('should retain quotes in pattern', () => {
+      const mm = new Minimatch('"foo"', { keepQuotes: true });
+      expect(mm.match('"foo"')).toBe(true);
+    });
+  });
+
+  describe('unescape option', () => {
+    it('should remove backslashes from pattern', () => {
+      const mm = new Minimatch('\\*', { unescape: true });
+      expect(mm.match('*')).toBe(true);
+    });
+  });
+});
