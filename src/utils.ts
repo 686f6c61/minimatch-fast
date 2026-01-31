@@ -127,18 +127,3 @@ export function slashSplit(
 
   return parts.filter((p) => p !== '');
 }
-
-/**
- * Check if a pattern contains glob magic characters
- */
-export function hasMagicChars(pattern: string): boolean {
-  // Check for glob special characters
-  return /[*?[\]{}()!@+]/.test(pattern);
-}
-
-/**
- * Unescape a string for regex use
- */
-export function escapeRegex(str: string): string {
-  return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-}

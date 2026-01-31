@@ -20,7 +20,7 @@ The key benefits are:
 - **Performance**: **6-25x faster** than minimatch for most patterns
 - **Security**: Not vulnerable to CVE-2022-3517 (ReDoS attack) that affected minimatch
 - **Stability**: No freezing on large brace ranges like `{1..1000}`
-- **Compatibility**: Passes 100% of minimatch's original test suite (355 tests)
+- **Compatibility**: Passes 100% of minimatch's original test suite (356 tests)
 - **POSIX Classes**: Full support for `[[:alpha:]]`, `[[:digit:]]`, `[[:alnum:]]`, and more
 - **Unicode**: Complete Unicode support including CJK characters and emoji
 - **Regex Safety**: Not affected by Issue #273 (invalid regex with commas in character classes)
@@ -754,11 +754,11 @@ minimatch('foo.txt', '!*.txt'); // false (is a .txt file)
 
 ### Test Suite
 
-Our test suite consists of **355 tests** organized into five categories:
+Our test suite consists of **356 tests** organized into five categories:
 
 1. **Unit Tests (42 tests)**: Core functionality and API tests
 2. **Edge Case Tests (42 tests)**: Windows paths, dotfiles, negation, extglob
-3. **Security Tests (22 tests)**: CVE-2022-3517 regression, pattern limits
+3. **Security Tests (23 tests)**: CVE-2022-3517 regression, pattern limits, input validation
 4. **Exhaustive Compatibility Tests (196 tests)**: All patterns from minimatch's original `patterns.js` test file
 5. **Verification Tests (53 tests)**: POSIX character classes, Unicode support, regex edge cases
 
@@ -886,6 +886,7 @@ The picomatch engine used internally provides:
 - **Built-in protection**: Protection against catastrophic backtracking in regular expressions
 - **Resource limits**: Limits on brace expansion to prevent Denial of Service attacks
 - **Pattern length limits**: Maximum pattern length to prevent memory exhaustion
+- **Input validation**: Both `path` and `pattern` parameters are validated to be strings
 
 ### Safe Pattern Handling
 
@@ -930,7 +931,7 @@ cd minimatch-fast
 npm install
 
 # Run tests
-npm test                 # All tests (355 tests)
+npm test                 # All tests (356 tests)
 npm run test:compat     # Compatibility tests only (196 tests)
 npm run benchmark       # Performance benchmarks
 

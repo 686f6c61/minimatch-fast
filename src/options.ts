@@ -19,13 +19,13 @@
  * @license MIT
  */
 
-import type { MinimatchOptions, PicomatchOptions, TranslatedOptions } from './types.js';
+import type { MinimatchOptions, PicomatchOptions } from './types.js';
 
 /**
  * Translate minimatch options to picomatch options
  * Handles naming differences and sets appropriate defaults
  */
-export function translateOptions(opts: MinimatchOptions = {}): TranslatedOptions {
+export function translateOptions(opts: MinimatchOptions = {}): { picoOpts: PicomatchOptions } {
   const picoOpts: PicomatchOptions = {
     // Direct mappings (same name, same meaning)
     dot: opts.dot,
@@ -40,36 +40,7 @@ export function translateOptions(opts: MinimatchOptions = {}): TranslatedOptions
 
     // Force POSIX mode - we handle Windows paths manually via normalizePath
     posix: true,
-
-    // Disable picomatch's brace handling - we use 'braces' package for full expansion
-    // picomatch only does brace matching, not expansion
-    // We expand braces ourselves, so tell picomatch not to process them
-    // Actually, we need nobrace: true to prevent double-processing
-    // The expanded patterns should be matched literally by picomatch
   };
 
-  // Special options that need custom handling (not passed to picomatch)
-  const special = {
-    nocomment: opts.nocomment ?? false,
-    nonull: opts.nonull ?? false,
-    flipNegate: opts.flipNegate ?? false,
-    windowsPathsNoEscape:
-      opts.windowsPathsNoEscape ?? opts.allowWindowsEscape === false,
-    partial: opts.partial ?? false,
-    magicalBraces: opts.magicalBraces ?? false,
-    debug: opts.debug ?? false,
-    optimizationLevel: opts.optimizationLevel ?? 1,
-  };
-
-  return { picoOpts, special };
-}
-
-/**
- * Merge options with defaults
- */
-export function mergeOptions(
-  defaults: MinimatchOptions,
-  options: MinimatchOptions
-): MinimatchOptions {
-  return { ...defaults, ...options };
+  return { picoOpts };
 }

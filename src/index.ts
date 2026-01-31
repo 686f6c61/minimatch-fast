@@ -104,7 +104,10 @@ export function minimatch(
   pattern: string,
   options: MinimatchOptions = {}
 ): boolean {
-  // Validate pattern type
+  // Validate input types
+  if (typeof path !== 'string') {
+    throw new TypeError('path must be a string');
+  }
   if (typeof pattern !== 'string') {
     throw new TypeError('glob pattern must be a string');
   }

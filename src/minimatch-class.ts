@@ -145,9 +145,9 @@ export class Minimatch {
     this.platform = options.platform || getPlatform();
     this.isWindows = checkIsWindows(this.platform);
 
-    // Handle Windows path escape mode
+    // Handle Windows path escape mode (use ?? for consistency with options.ts)
     this.windowsPathsNoEscape =
-      !!options.windowsPathsNoEscape || options.allowWindowsEscape === false;
+      options.windowsPathsNoEscape ?? options.allowWindowsEscape === false;
 
     // Normalize pattern for Windows if needed
     if (this.windowsPathsNoEscape) {
@@ -430,15 +430,12 @@ export class Minimatch {
     const lastSlashIdx = path.lastIndexOf('/');
     const basename = lastSlashIdx >= 0 ? path.slice(lastSlashIdx + 1) : path;
 
-    // minimatch compatibility: '.' and '..' never match unless pattern is exactly '.' or '..'
+    // minimatch compatibility: '.' and '..' never match unless pattern explicitly includes them
     // This is true even with dot:true option
     if (basename === '.' || basename === '..') {
-      // Only match if the pattern is exactly the basename (use cached value)
-      if (this._patternBasename !== basename && this._patternBasename !== '.*' + basename.slice(1)) {
-        // Check if pattern explicitly matches . or ..
-        if (!this.pattern.includes(basename)) {
-          return this.negate ? true : false;
-        }
+      // Only match if the pattern basename equals the path or pattern contains the special dir
+      if (this._patternBasename !== basename && !this.pattern.includes(basename)) {
+        return this.negate ? true : false;
       }
     }
 
@@ -510,9 +507,6 @@ export class Minimatch {
     return this.negate ? !matches : matches;
   }
 
-  // Note: _hasNegatedCharClass and _requiresTrailingSlash are now cached
-  // in the constructor as _hasNegatedCharClassCached and _requiresTrailingSlashCached
-  // for better performance (avoids regex test on every match() call)
 
   /**
    * Pre-process pattern for minimatch compatibility
@@ -718,8 +712,8 @@ export class Minimatch {
       return fi === fl - 1 && file[fi] === '';
     }
 
-    // Shouldn't reach here
-    throw new Error('wtf?');
+    // This point should be unreachable given the logic above
+    throw new Error('Unexpected state in matchOne: pattern/file mismatch');
   }
 
   /**

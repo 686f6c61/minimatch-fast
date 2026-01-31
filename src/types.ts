@@ -174,9 +174,9 @@ export interface MinimatchOptions {
 
   /**
    * Optimization level for pattern processing
-   * 0 = no optimization
-   * 1 = basic optimization (default)
-   * 2+ = aggressive optimization
+   * - 0: No optimization (explicit disable, not recommended)
+   * - 1: Basic optimization (default, recommended)
+   * - 2+: Aggressive optimization
    * @default 1
    */
   optimizationLevel?: number;
@@ -213,19 +213,3 @@ export interface PicomatchOptions {
   expandRange?: (a: string, b: string) => string;
 }
 
-/**
- * Result of translating minimatch options to picomatch options
- */
-export interface TranslatedOptions {
-  picoOpts: PicomatchOptions;
-  special: {
-    nocomment: boolean;
-    nonull: boolean;
-    flipNegate: boolean;
-    windowsPathsNoEscape: boolean;
-    partial: boolean;
-    magicalBraces: boolean;
-    debug: boolean;
-    optimizationLevel: number;
-  };
-}

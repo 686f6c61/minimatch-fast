@@ -15,6 +15,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-01-31
+
+### Added
+
+- **Test coverage**: Added test for non-string `path` parameter validation in `security.test.ts`
+
+### Changed
+
+- Total tests: 355 -> 356
+
+## [0.2.2] - 2026-01-31
+
+### Changed
+
+- **Improved error messages**: Replaced unclear error message in `matchOne()` with descriptive text
+- **Refactored cache logic**: Extracted duplicated LRU eviction code into `addToBraceCache()` helper function
+- **Better documentation**: Added detailed comments explaining cache size choices and `optimizationLevel` option
+- **Input validation**: Added type validation for `path` parameter in `minimatch()` function
+- **Simplified logic**: Cleaned up `.` and `..` directory handling in `match()` method
+- **Consistent operators**: Unified `windowsPathsNoEscape` handling to use `??` operator consistently
+
+### Fixed
+
+- **Security**: Updated transitive dependency `lodash` to resolve CVE prototype pollution vulnerability (GHSA-xxjr-mmjv-4gpg)
+
+### Removed
+
+- Removed `console.warn` from brace expansion (libraries should not write to console)
+- Removed unused functions: `hasBraces()`, `hasMagicChars()`, `escapeRegex()`, `mergeOptions()`
+- Removed unused `TranslatedOptions` type and `special` object from options translator
+- Removed obsolete comments that described already-implemented optimizations
+
+### Internal
+
+- Cleaner codebase following clean code principles
+- All 355 tests passing
+
 ## [0.2.0] - 2025-12-29
 
 ### Added

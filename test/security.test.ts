@@ -121,6 +121,14 @@ describe('Pattern validation', () => {
     expect(() => minimatch('test', {} as unknown as string)).toThrow(TypeError);
   });
 
+  it('should reject non-string paths', () => {
+    expect(() => minimatch(null as unknown as string, '*.js')).toThrow(TypeError);
+    expect(() => minimatch(undefined as unknown as string, '*.js')).toThrow(TypeError);
+    expect(() => minimatch(123 as unknown as string, '*.js')).toThrow(TypeError);
+    expect(() => minimatch({} as unknown as string, '*.js')).toThrow(TypeError);
+    expect(() => minimatch([] as unknown as string, '*.js')).toThrow(TypeError);
+  });
+
   it('should reject extremely long patterns', () => {
     const veryLongPattern = 'a'.repeat(100000);
     expect(() => minimatch('test', veryLongPattern)).toThrow(TypeError);
