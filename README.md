@@ -673,21 +673,177 @@ These options extend the original minimatch API with additional picomatch capabi
 | `onIgnore` | function | Called when a pattern is ignored. Receives match result object. |
 | `onResult` | function | Called for all results. Receives match result object. |
 
+#### Extended Options Examples
+
+**`ignore`** - Exclude patterns from matching:
+
 ```javascript
-// Example: using callbacks
+// Single ignore pattern
+const mm = new Minimatch('*.js', { ignore: '*.test.js' });
+mm.match('app.js');       // true
+mm.match('app.test.js');  // false (ignored)
+
+// Multiple ignore patterns
+const mm = new Minimatch('**/*.js', {
+  ignore: ['**/*.test.js', '**/*.spec.js', '**/node_modules/**']
+});
+mm.match('src/app.js');           // true
+mm.match('src/app.test.js');      // false
+mm.match('node_modules/lib.js');  // false
+```
+
+**`failglob`** - Throw error when no matches found:
+
+```javascript
+// Useful for build scripts that require matches
+try {
+  const matches = minimatch.match(files, 'src/**/*.ts', { failglob: true });
+  // Process matches...
+} catch (err) {
+  console.error('No TypeScript files found!');
+  process.exit(1);
+}
+
+// failglob takes precedence over nonull
+minimatch.match([], '*.js', { failglob: true, nonull: true });
+// Throws: Error: No matches found for pattern: *.js (searched 0 paths)
+```
+
+**`maxLength`** - Limit pattern length (security):
+
+```javascript
+// Default is 65536 characters
+const mm = new Minimatch('*.js'); // Uses default
+
+// Custom limit for user input
+const userPattern = getUserInput();
+try {
+  const mm = new Minimatch(userPattern, { maxLength: 1000 });
+} catch (err) {
+  console.error('Pattern too long');
+}
+
+// Invalid values are rejected
+new Minimatch('*.js', { maxLength: -1 });    // Throws TypeError
+new Minimatch('*.js', { maxLength: NaN });   // Throws TypeError
+```
+
+**`contains`** - Match pattern anywhere in string:
+
+```javascript
+// Without contains: must match entire string
+minimatch('foobar', 'bar');                    // false
+
+// With contains: matches substring
+minimatch('foobar', 'bar', { contains: true }); // true
+minimatch('foobar', 'ob', { contains: true });  // true
+
+// Useful for searching within paths
+const mm = new Minimatch('components', { contains: true });
+mm.match('src/components/Button.js');  // true
+mm.match('lib/utils/helpers.js');      // false
+```
+
+**`format`** - Transform strings before matching:
+
+```javascript
+// Remove leading ./ from paths
+const mm = new Minimatch('src/*.js', {
+  format: (str) => str.replace(/^\.\//, '')
+});
+mm.match('./src/app.js');  // true (formatted to 'src/app.js')
+mm.match('src/app.js');    // true
+
+// Normalize paths
+const mm = new Minimatch('**/*.js', {
+  format: (str) => str.toLowerCase().replace(/\\/g, '/')
+});
+mm.match('SRC\\App.JS');  // true
+```
+
+**`flags`** - Custom regex flags:
+
+```javascript
+// Case insensitive with 'i' flag
+const mm = new Minimatch('*.JS', { flags: 'i' });
+mm.match('app.js');  // true
+mm.match('app.JS');  // true
+
+// Note: 'flags' overrides 'nocase' option
+```
+
+**`bash`** - Strict bash compatibility:
+
+```javascript
+// Enable strict bash matching rules
+const mm = new Minimatch('*.js', { bash: true });
+// Disallows backslashes as escape characters
+// Treats single stars as globstars in some contexts
+```
+
+**`expandRange`** - Custom range expansion:
+
+```javascript
+// Custom range function for brace patterns
+const mm = new Minimatch('{1..5}.js', {
+  expandRange: (a, b) => {
+    // Custom logic for expanding a..b
+    return `(${a}|${b})`; // Simplified example
+  }
+});
+```
+
+**`strictBrackets`** - Validate bracket syntax:
+
+```javascript
+// Throw on imbalanced brackets
+try {
+  new Minimatch('[abc', { strictBrackets: true });
+} catch (err) {
+  console.error('Invalid pattern: unbalanced brackets');
+}
+
+// Without strictBrackets, invalid patterns are handled gracefully
+new Minimatch('[abc');  // No error, treated as literal
+```
+
+**`literalBrackets`** - Match literal brackets:
+
+```javascript
+// Match files with literal brackets in name
+const mm = new Minimatch('[file].js', { literalBrackets: true });
+mm.match('[file].js');  // true
+mm.match('f.js');       // false (not treated as character class)
+```
+
+#### Callback Options Examples
+
+Callbacks receive a result object with `{ isMatch, match, output }`:
+
+```javascript
+// Track all matching operations
+const stats = { matches: 0, misses: 0 };
+
 const mm = new Minimatch('*.js', {
-  onMatch: (result) => console.log('Match:', result.input),
-  onIgnore: (result) => console.log('Ignored:', result.input),
+  onMatch: (result) => {
+    stats.matches++;
+    console.log(`Matched: ${result.output}`);
+  },
+  onResult: (result) => {
+    if (!result.isMatch) stats.misses++;
+  }
 });
 
-// Example: using ignore option
-const mm = new Minimatch('*.js', { ignore: ['*.test.js', '*.spec.js'] });
-mm.match('app.js');      // true
-mm.match('app.test.js'); // false (ignored)
+files.forEach(f => mm.match(f));
+console.log(`${stats.matches} matches, ${stats.misses} misses`);
 
-// Example: failglob throws on no matches
-minimatch.match(['a.txt', 'b.txt'], '*.js', { failglob: true });
-// Throws: Error: No matches found for pattern: *.js
+// Use with ignore for detailed logging
+const mm = new Minimatch('**/*.js', {
+  ignore: ['**/node_modules/**'],
+  onIgnore: (result) => {
+    console.log(`Skipped: ${result.output}`);
+  }
+});
 ```
 
 ## Glob Syntax

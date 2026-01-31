@@ -15,6 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-02-01
+
+### Added
+
+- **Documentation**: Complete examples for all 15 extended options in README
+- **Landing page**: Interactive examples grid for extended options
+
+### Changed
+
+- Improved documentation with practical use cases for each option
+
 ## [0.3.0] - 2026-02-01
 
 ### Added
