@@ -121,6 +121,58 @@ const callbackOptions = [
         </tbody>
       </table>
     </div>
+
+    <h3>Examples</h3>
+    <div class="examples-grid">
+      <div class="example-card">
+        <h4>ignore</h4>
+        <pre><code>const mm = new Minimatch('**/*.js', {'{'}
+  ignore: ['**/*.test.js', '**/node_modules/**']
+{'}'});
+mm.match('src/app.js');      // true
+mm.match('src/app.test.js'); // false</code></pre>
+      </div>
+
+      <div class="example-card">
+        <h4>failglob</h4>
+        <pre><code>// Throw if no matches found
+minimatch.match(files, '*.ts', {'{'} failglob: true {'}'});
+// Error: No matches found for pattern: *.ts</code></pre>
+      </div>
+
+      <div class="example-card">
+        <h4>contains</h4>
+        <pre><code>// Match anywhere in string
+minimatch('foobar', 'bar', {'{'} contains: true {'}'});
+// true (matches substring)</code></pre>
+      </div>
+
+      <div class="example-card">
+        <h4>format</h4>
+        <pre><code>// Transform paths before matching
+const mm = new Minimatch('src/*.js', {'{'}
+  format: (s) => s.replace(/^\.\//, '')
+{'}'});
+mm.match('./src/app.js'); // true</code></pre>
+      </div>
+
+      <div class="example-card">
+        <h4>callbacks</h4>
+        <pre><code>const mm = new Minimatch('*.js', {'{'}
+  onMatch: (r) => console.log('Match:', r.output),
+  onResult: (r) => stats[r.isMatch ? 'hits' : 'miss']++
+{'}'});</code></pre>
+      </div>
+
+      <div class="example-card">
+        <h4>literalBrackets</h4>
+        <pre><code>// Match literal brackets in filenames
+const mm = new Minimatch('[file].js', {'{'}
+  literalBrackets: true
+{'}'});
+mm.match('[file].js'); // true</code></pre>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -168,5 +220,37 @@ const callbackOptions = [
   .desc-cell {
     font-size: 0.875rem;
     color: var(--gray-600);
+  }
+
+  .examples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .example-card {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+
+  .example-card h4 {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    margin: 0 0 0.75rem 0;
+    color: var(--primary);
+  }
+
+  .example-card pre {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+
+  .example-card code {
+    font-family: var(--font-mono);
   }
 </style>
