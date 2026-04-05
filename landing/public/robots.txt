@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://minimatch-fast.onrender.com/sitemap.xml
+Sitemap: https://minimatch-fast.686f6c61.dev/sitemap.xml
