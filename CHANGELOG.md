@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-04-06
+
+### Changed
+
+- Migrated landing page URL from Render to self-hosted infrastructure (minimatch-fast.686f6c61.dev)
+
 ## [0.3.1] - 2026-02-01
 
 ### Added

@@ -7,7 +7,7 @@
 [![license](https://img.shields.io/npm/l/minimatch-fast.svg)](LICENSE)
 [![CI](https://github.com/686f6c61/minimatch-fast/workflows/CI/badge.svg)](https://github.com/686f6c61/minimatch-fast/actions)
 
-**[Documentation & Examples](https://minimatch-fast.onrender.com)** | **[GitHub](https://github.com/686f6c61/minimatch-fast)**
+**[Documentation & Examples](https://minimatch-fast.686f6c61.dev)** | **[GitHub](https://github.com/686f6c61/minimatch-fast)**
 
 ## Why minimatch-fast?
 

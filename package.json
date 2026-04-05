@@ -1,6 +1,6 @@
 {
   "name": "minimatch-fast",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "type": "module",
   "description": "Drop-in replacement for minimatch. 6-25x faster. Powered by picomatch.",
   "main": "./dist/cjs/index.js",
@@ -79,5 +79,5 @@
   "bugs": {
     "url": "https://github.com/686f6c61/minimatch-fast/issues"
   },
-  "homepage": "https://minimatch-fast.onrender.com"
+  "homepage": "https://minimatch-fast.686f6c61.dev"
 }
