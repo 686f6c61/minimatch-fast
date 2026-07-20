@@ -1,11 +1,30 @@
 /**
- * @fileoverview Performance benchmark: minimatch-fast vs original minimatch
+ * @fileoverview Fair performance comparison: minimatch-fast vs minimatch
  *
- * Compares performance across pattern types and optimizations:
- * - Pattern matching (simple, globstar, braces, extglob)
- * - Pre-compiled Minimatch class
- * - LRU cache effectiveness
- * - Fast-path optimizations
+ * Methodology (designed to avoid the biases of the previous benchmark):
+ *
+ * - A/B/B/A interleaving: both libraries alternate execution order across
+ *   rounds to cancel JIT warmup and machine drift.
+ * - Warmup rounds are discarded; medians are reported, not single runs.
+ * - Four scenarios are measured separately, because "which is faster"
+ *   depends on HOW the library is used:
+ *     1. compile       - pattern compilation only (new Minimatch instances)
+ *     2. precompiled   - matching with pre-compiled instances (pure engine,
+ *                        no cache involvement on either side)
+ *     3. end-to-end    - minimatch(path, pattern) calls, cache CLEARED each
+ *                        round (worst case for minimatch-fast: pays
+ *                        compilation on every round, like minimatch always
+ *                        does)
+ *     4. warm function - minimatch(path, pattern) repeated with the cache
+ *                        intact. This is the real-world usage pattern
+ *                        (same .gitignore/eslintignore patterns matched
+ *                        against thousands of files) and it is where the
+ *                        LRU cache helps. minimatch has no pattern cache;
+ *                        this asymmetry is a product feature and is
+ *                        disclosed as such, not hidden.
+ * - Deterministic corpus: 1000 pseudo-random repo-like paths generated
+ *   from a fixed seed, so results are reproducible.
+ * - Environment (Node version, platform, CPU) is printed for context.
  *
  * Run with: npm run benchmark
  *
@@ -14,7 +33,8 @@
  * @license MIT
  */
 
-import Benchmark from 'benchmark';
+import { performance } from 'node:perf_hooks';
+import os from 'node:os';
 import {
   minimatch as originalMinimatch,
   Minimatch as OriginalMinimatch,
@@ -22,7 +42,49 @@ import {
 import { minimatch as fastMinimatch, Minimatch } from '../src';
 
 // ---------------------------------------------------------------------------
-// Test data
+// Deterministic corpus: 1000 repo-like paths from a fixed seed
+// ---------------------------------------------------------------------------
+
+function mulberry32(seed: number): () => number {
+  let a = seed;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function buildCorpus(size: number): string[] {
+  const rand = mulberry32(42);
+  const dirs = [
+    'src', 'src/components', 'src/utils', 'src/lib/core', 'test',
+    'test/unit', 'test/integration', 'lib', 'dist', 'docs',
+    'node_modules/lodash', 'node_modules/react', 'scripts',
+    '.github/workflows', 'packages/core', 'packages/cli',
+  ];
+  const names = [
+    'index', 'main', 'utils', 'helpers', 'engine', 'parser', 'config',
+    'button', 'modal', 'api', 'server', 'client', 'store', 'router',
+  ];
+  const exts = ['js', 'ts', 'tsx', 'jsx', 'json', 'css', 'md', 'test.js', 'spec.ts', 'min.js'];
+
+  const paths: string[] = [];
+  for (let i = 0; i < size; i++) {
+    const dir = dirs[Math.floor(rand() * dirs.length)];
+    const name = names[Math.floor(rand() * names.length)];
+    const ext = exts[Math.floor(rand() * exts.length)];
+    const suffix = rand() < 0.3 ? Math.floor(rand() * 100) : '';
+    paths.push(`${dir}/${name}${suffix}.${ext}`);
+  }
+  return paths;
+}
+
+const corpus = buildCorpus(1000);
+
+// ---------------------------------------------------------------------------
+// Patterns under test
 // ---------------------------------------------------------------------------
 
 const patterns = [
@@ -32,230 +94,204 @@ const patterns = [
   { name: 'Braces complex', pattern: '{src,lib}/**/*.{js,ts,tsx}' },
   { name: 'Character class', pattern: 'file[0-9].js' },
   { name: 'Negation', pattern: '!*.test.js' },
-  { name: 'Leading star', pattern: '*.txt' },
   { name: 'Multiple globstar', pattern: '**/**/**/*.js' },
   { name: 'Extglob @()', pattern: '@(foo|bar|baz).js' },
   { name: 'Question mark', pattern: '???.js' },
 ];
 
-const testPaths = [
-  'index.js',
-  'src/components/Button.js',
-  'src/utils/helpers.ts',
-  'test/unit/button.test.js',
-  'node_modules/lodash/index.js',
-  'lib/core/engine.tsx',
-  'dist/bundle.min.js',
-  'file1.js',
-  'foo.js',
-  'abc.js',
-];
-
 // ---------------------------------------------------------------------------
-// Types
+// Measurement harness
 // ---------------------------------------------------------------------------
 
-interface BenchmarkResult {
-  name: string;
-  pattern: string;
-  originalOps: number;
-  fastOps: number;
-  speedup: number;
+const WARMUP_ROUNDS = 3;
+const MEASURED_ROUNDS = 15;
+
+interface Scenario {
+  title: string;
+  note?: string;
+  original: () => void;
+  fast: () => void;
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function printHeader(title: string): void {
-  console.log(`\n[*] ${title}`);
-  console.log('-'.repeat(60));
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2;
 }
 
-function printWinner(speedup: number, fastestName?: string): void {
-  if (speedup > 1) {
-    console.log(`  [+] Winner: minimatch-fast (${speedup.toFixed(2)}x faster)`);
-  } else {
-    console.log(
-      `  [-] Winner: ${fastestName} (${(1 / speedup).toFixed(2)}x faster)`
-    );
+/**
+ * Run one scenario with A/B/B/A interleaving.
+ * Returns median milliseconds per round for each library.
+ */
+function measure(scenario: Scenario): { originalMs: number; fastMs: number } {
+  const originalTimes: number[] = [];
+  const fastTimes: number[] = [];
+
+  const runOriginal = () => {
+    const t0 = performance.now();
+    scenario.original();
+    originalTimes.push(performance.now() - t0);
+  };
+  const runFast = () => {
+    const t0 = performance.now();
+    scenario.fast();
+    fastTimes.push(performance.now() - t0);
+  };
+
+  // Warmup (discarded): both libs get equal JIT exposure
+  for (let i = 0; i < WARMUP_ROUNDS; i++) {
+    runOriginal();
+    runFast();
+    originalTimes.length = 0;
+    fastTimes.length = 0;
   }
+
+  // Measured rounds, alternating order A/B/B/A to cancel drift
+  for (let i = 0; i < MEASURED_ROUNDS; i++) {
+    if (i % 4 < 2) {
+      runOriginal();
+      runFast();
+    } else {
+      runFast();
+      runOriginal();
+    }
+  }
+
+  return { originalMs: median(originalTimes), fastMs: median(fastTimes) };
 }
 
-function runComparisonSuite(
-  name: string,
-  originalFn: () => void,
-  fastFn: () => void
-): { originalOps: number; fastOps: number } {
-  const suite = new Benchmark.Suite(name);
-  let originalOps = 0;
-  let fastOps = 0;
+// ---------------------------------------------------------------------------
+// Scenarios
+// ---------------------------------------------------------------------------
 
-  suite
-    .add('minimatch      ', originalFn)
-    .add('minimatch-fast ', fastFn)
-    .on('cycle', (event: Benchmark.Event) => {
-      const target = event.target as Benchmark.Target;
-      console.log('  ' + String(target));
+function compileScenario(pattern: string): Scenario {
+  return {
+    title: `compile "${pattern}"`,
+    original: () => {
+      for (let i = 0; i < 100; i++) new OriginalMinimatch(pattern);
+    },
+    fast: () => {
+      for (let i = 0; i < 100; i++) new Minimatch(pattern);
+    },
+  };
+}
 
-      if (target.name?.includes('minimatch-fast')) {
-        fastOps = target.hz ?? 0;
-      } else {
-        originalOps = target.hz ?? 0;
+function precompiledScenario(pattern: string): Scenario {
+  const origMM = new OriginalMinimatch(pattern);
+  const fastMM = new Minimatch(pattern);
+  return {
+    title: `precompiled match "${pattern}"`,
+    note: 'pure engine, no cache on either side',
+    original: () => {
+      for (const p of corpus) origMM.match(p);
+    },
+    fast: () => {
+      for (const p of corpus) fastMM.match(p);
+    },
+  };
+}
+
+function endToEndColdScenario(pattern: string): Scenario {
+  return {
+    title: `end-to-end cold "${pattern}"`,
+    note: 'function API, every call compiles (cache cleared per call)',
+    original: () => {
+      for (const p of corpus) originalMinimatch(p, pattern);
+    },
+    fast: () => {
+      // Clear before EVERY call so minimatch-fast pays compilation per call,
+      // exactly like minimatch (which has no cache) does. Apples to apples.
+      for (const p of corpus) {
+        fastMinimatch.clearCache();
+        fastMinimatch(p, pattern);
       }
-    })
-    .run({ async: false });
+    },
+  };
+}
 
-  return { originalOps, fastOps };
+function warmFunctionScenario(pattern: string): Scenario {
+  return {
+    title: `warm function "${pattern}"`,
+    note: 'function API with LRU cache (real-world globbing)',
+    original: () => {
+      for (const p of corpus) originalMinimatch(p, pattern);
+    },
+    fast: () => {
+      for (const p of corpus) fastMinimatch(p, pattern);
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
-const results: BenchmarkResult[] = [];
+interface Row {
+  scenario: string;
+  originalMs: number;
+  fastMs: number;
+  speedup: number;
+}
+
+const rows: Row[] = [];
 
 console.log('');
 console.log('================================================================');
-console.log('           minimatch-fast Benchmark Results                     ');
+console.log('       minimatch-fast vs minimatch - Fair Benchmark            ');
 console.log('================================================================');
+console.log('');
+console.log(`  Node: ${process.version}  |  ${os.platform()} ${os.arch()}  |  ${os.cpus()[0]?.model ?? 'unknown CPU'}`);
+console.log(`  Corpus: ${corpus.length} paths  |  warmup: ${WARMUP_ROUNDS} rounds  |  measured: ${MEASURED_ROUNDS} rounds (median, A/B/B/A)`);
+console.log('');
+console.log('  scenario                                              minimatch   minimatch-fast  speedup');
+console.log('  '.padEnd(92, '-'));
 
-// Pattern comparison benchmarks
-patterns.forEach(({ name, pattern }) => {
-  printHeader(`${name}: "${pattern}"`);
-
-  const { originalOps, fastOps } = runComparisonSuite(
-    name,
-    () => testPaths.forEach((p) => originalMinimatch(p, pattern)),
-    () => testPaths.forEach((p) => fastMinimatch(p, pattern))
+function report(scenario: Scenario): void {
+  const { originalMs, fastMs } = measure(scenario);
+  const speedup = originalMs / fastMs;
+  rows.push({ scenario: scenario.title, originalMs, fastMs, speedup });
+  const note = scenario.note ? `  (${scenario.note})` : '';
+  console.log(
+    `  ${scenario.title.padEnd(46)} ${originalMs.toFixed(2).padStart(9)}ms ${fastMs.toFixed(2).padStart(13)}ms ${speedup.toFixed(2).padStart(9)}x${note}`
   );
+}
 
-  const speedup = fastOps / originalOps;
-  results.push({ name, pattern, originalOps, fastOps, speedup });
-  printWinner(speedup);
-});
+// 1. Compilation (representative subset)
+for (const { pattern } of [patterns[0]!, patterns[1]!, patterns[3]!, patterns[7]!]) {
+  report(compileScenario(pattern));
+}
 
-// Pre-compiled Minimatch class benchmark
-printHeader('Pre-compiled Minimatch class (repeated matching)');
+// 2. Precompiled matching: the purest engine comparison
+for (const { pattern } of patterns) {
+  report(precompiledScenario(pattern));
+}
 
-const compilePattern = '**/*.{js,ts,tsx}';
-const origMM = new OriginalMinimatch(compilePattern);
-const fastMM = new Minimatch(compilePattern);
+// 3. End-to-end cold: function API paying compilation every round
+for (const { pattern } of [patterns[0]!, patterns[1]!, patterns[3]!, patterns[7]!]) {
+  report(endToEndColdScenario(pattern));
+}
 
-const { originalOps: origCompiledOps, fastOps: fastCompiledOps } =
-  runComparisonSuite(
-    'Pre-compiled',
-    () => testPaths.forEach((p) => origMM.match(p)),
-    () => testPaths.forEach((p) => fastMM.match(p))
-  );
-
-const compiledSpeedup = fastCompiledOps / origCompiledOps;
-results.push({
-  name: 'Pre-compiled class',
-  pattern: compilePattern,
-  originalOps: origCompiledOps,
-  fastOps: fastCompiledOps,
-  speedup: compiledSpeedup,
-});
-console.log(`  [+] Pre-compiled speedup: ${compiledSpeedup.toFixed(2)}x`);
-
-// Cache effectiveness benchmark (minimatch-fast only)
-printHeader('Cache effectiveness (repeated patterns)');
-
-const cacheTestPattern = '**/*.{js,ts}';
-const cacheIterations = 1000;
-
-// Clear cache before test
-fastMinimatch.clearCache();
-
-const cacheSuite = new Benchmark.Suite('Cache');
-let coldOps = 0;
-let warmOps = 0;
-
-cacheSuite
-  .add('Cold cache (first call per pattern)', () => {
-    fastMinimatch.clearCache();
-    for (let i = 0; i < 10; i++) {
-      fastMinimatch(`file${i}.js`, `pattern${i}/*.js`);
-    }
-  })
-  .add('Warm cache (repeated patterns)    ', () => {
-    for (let i = 0; i < 10; i++) {
-      fastMinimatch(`file${i}.js`, cacheTestPattern);
-    }
-  })
-  .on('cycle', (event: Benchmark.Event) => {
-    const target = event.target as Benchmark.Target;
-    console.log('  ' + String(target));
-
-    if (target.name?.includes('Warm')) {
-      warmOps = target.hz ?? 0;
-    } else {
-      coldOps = target.hz ?? 0;
-    }
-  })
-  .on('complete', () => {
-    const cacheSpeedup = warmOps / coldOps;
-    console.log(`  [+] Cache speedup: ${cacheSpeedup.toFixed(2)}x`);
-  })
-  .run({ async: false });
-
-// Fast-path benchmark (simple patterns that bypass full parsing)
-printHeader('Fast-path optimization (simple patterns)');
-
-const fastPathPatterns = ['*.js', '*', '???', '*.txt'];
-const fastPathSuite = new Benchmark.Suite('Fast-path');
-
-fastPathSuite
-  .add('minimatch (no fast-path)      ', () => {
-    fastPathPatterns.forEach((p) => {
-      testPaths.forEach((path) => originalMinimatch(path, p));
-    });
-  })
-  .add('minimatch-fast (with fast-path)', () => {
-    fastPathPatterns.forEach((p) => {
-      testPaths.forEach((path) => fastMinimatch(path, p));
-    });
-  })
-  .on('cycle', (event: Benchmark.Event) => {
-    const target = event.target as Benchmark.Target;
-    console.log('  ' + String(target));
-  })
-  .on('complete', function (this: Benchmark.Suite) {
-    const fastest = this.filter('fastest').map(
-      'name' as keyof Benchmark.Target
-    );
-    console.log(`  [+] Fastest: ${fastest}`);
-  })
-  .run({ async: false });
+// 4. Warm function API: real-world repeated usage
+for (const { pattern } of [patterns[0]!, patterns[1]!, patterns[3]!, patterns[7]!]) {
+  report(warmFunctionScenario(pattern));
+}
 
 // Summary
-console.log('\n');
-console.log('================================================================');
-console.log('                        Summary                                 ');
-console.log('================================================================');
 console.log('');
-console.log('  Pattern                    Speedup');
-console.log('  ---------------------------------------');
+console.log('  '.padEnd(92, '-'));
 
-results.forEach(({ name, speedup }) => {
-  const bar = '#'.repeat(Math.min(Math.round(speedup * 2), 40));
-  const speedupStr =
-    speedup >= 1
-      ? `${speedup.toFixed(1)}x faster`
-      : `${(1 / speedup).toFixed(1)}x slower`;
-  console.log(`  ${name.padEnd(24)} ${speedupStr.padEnd(12)} ${bar}`);
-});
+const geometricMean = (values: number[]): number =>
+  Math.exp(values.reduce((s, v) => s + Math.log(v), 0) / values.length);
 
-const avgSpeedup =
-  results.reduce((sum, r) => sum + r.speedup, 0) / results.length;
-const minSpeedup = Math.min(...results.map((r) => r.speedup));
-const maxSpeedup = Math.max(...results.map((r) => r.speedup));
-
+const speedups = rows.map((r) => r.speedup);
+console.log(`  Geometric mean speedup (all ${rows.length} scenarios): ${geometricMean(speedups).toFixed(2)}x`);
+console.log(`  Range: ${Math.min(...speedups).toFixed(2)}x - ${Math.max(...speedups).toFixed(2)}x`);
 console.log('');
-console.log('  ---------------------------------------');
-console.log(`  Average speedup: ${avgSpeedup.toFixed(1)}x faster`);
-console.log(`  Range: ${minSpeedup.toFixed(1)}x - ${maxSpeedup.toFixed(1)}x`);
+console.log('  Notes:');
+console.log('  - "precompiled" is the honest engine-vs-engine comparison.');
+console.log('  - "warm function" includes minimatch-fast\'s LRU cache; minimatch');
+console.log('    has no pattern cache. This asymmetry is a feature of the library,');
+console.log('    disclosed here explicitly.');
 console.log('');
 console.log('================================================================');
 console.log('');
