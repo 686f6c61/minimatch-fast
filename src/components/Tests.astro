@@ -8,6 +8,7 @@ const testCategories = [
   { name: 'Edge Case Tests', count: 64, description: 'Windows paths, extended options, dotfiles' },
   { name: 'Security Tests', count: 23, description: 'CVE-2022-3517 and input validation tests' },
   { name: 'Verification Tests', count: 53, description: 'POSIX classes, Unicode, regex edge cases' },
+  { name: 'Regression Tests', count: 24, description: 'Cache correctness, hasMagic, makeRe, escape alignment' },
 ];
 
 const runTests = `# Run all tests
@@ -43,7 +44,7 @@ npm run test:compat`;
     </div>
 
     <div class="test-details">
-      <h3>378 Tests Total</h3>
+      <h3>402 Tests Total</h3>
       <p>
         Every release is verified against the original minimatch test suite plus
         additional tests for edge cases, Windows paths, and security vulnerabilities.

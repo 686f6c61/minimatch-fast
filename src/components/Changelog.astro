@@ -1,9 +1,30 @@
 ---
 const versions = [
   {
+    version: '0.4.0',
+    date: '20/07/2026',
+    tag: 'Current',
+    highlights: [
+      'Cache correctness fixes',
+      'hasMagic() and makeRe() parity with minimatch',
+      'escape/unescape 1:1 alignment',
+      '402 tests'
+    ],
+    changes: [
+      { type: 'fixed', text: 'Cache key now includes every matching-affecting option (contains, bash, flags, ignore, maxLength, strictBrackets, literalBrackets, keepQuotes, unescape, magicalBraces)' },
+      { type: 'fixed', text: 'hasMagic() returns false for literal patterns, matching minimatch' },
+      { type: 'fixed', text: 'makeRe() honors negated patterns (!*.js), matching minimatch' },
+      { type: 'fixed', text: 'nonull option no longer leaks between calls through the pattern cache' },
+      { type: 'changed', text: 'escape()/unescape() aligned 1:1 with minimatch: braces only escaped with magicalBraces: true' },
+      { type: 'changed', text: 'Fast paths fall back to the full engine when options they cannot honor are present' },
+      { type: 'security', text: 'maxLength is now also enforced before fast-path matching' },
+      { type: 'security', text: 'Releases published via npm trusted publishing (OIDC) with Sigstore provenance' },
+      { type: 'added', text: '24 new regression tests (402 total)' },
+    ]
+  },
+  {
     version: '0.3.0',
     date: '01/02/2026',
-    tag: 'Current',
     highlights: [
       '15 new picomatch options',
       'Callback support',

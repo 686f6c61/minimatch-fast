@@ -10,7 +10,7 @@ const {
   description = 'Drop-in replacement for minimatch. 6-25x faster. Zero vulnerabilities. The fastest glob pattern matching library for Node.js.'
 } = Astro.props;
 
-const siteUrl = 'https://minimatch-fast.onrender.com';
+const siteUrl = 'https://minimatch-fast.686f6c61.dev';
 const siteName = 'minimatch-fast';
 
 // Structured data for SEO (SoftwareApplication schema)
@@ -35,13 +35,12 @@ const structuredData = {
   "license": "https://opensource.org/licenses/MIT",
   "programmingLanguage": ["JavaScript", "TypeScript"],
   "runtimePlatform": "Node.js",
-  "softwareVersion": "0.2.0",
+  "softwareVersion": "0.4.0",
   "downloadUrl": "https://www.npmjs.com/package/minimatch-fast",
-  "releaseNotes": "LRU pattern cache, fast paths for simple patterns, 9.4x faster average performance",
+  "releaseNotes": "Cache correctness fixes, hasMagic()/makeRe() alignment with minimatch, escape/unescape 1:1 compat. 402 tests. Published via npm trusted publishing (OIDC) with provenance.",
   "keywords": ["glob", "minimatch", "pattern matching", "fast", "performance", "nodejs", "javascript", "typescript"]
 };
 ---
-import '../styles/global.css';
 
 <!doctype html>
 <html lang="en">
