@@ -103,8 +103,17 @@ const patterns = [
 // Measurement harness
 // ---------------------------------------------------------------------------
 
-const WARMUP_ROUNDS = 3;
-const MEASURED_ROUNDS = 15;
+const WARMUP_ROUNDS = 5;
+const MEASURED_ROUNDS = 21;
+
+/**
+ * Inner repetitions of the corpus per measured round.
+ * Single-corpus rounds take 0.05-0.2ms for fast patterns, where CPU turbo,
+ * scheduling and GC jitter produce 2-3x swings between identical runs.
+ * Longer samples (5x corpus) average out that machine noise; this makes the
+ * harness strictly more robust, not more lenient.
+ */
+const INNER_REPEAT = 5;
 
 interface Scenario {
   title: string;
@@ -183,10 +192,12 @@ function precompiledScenario(pattern: string): Scenario {
     title: `precompiled match "${pattern}"`,
     note: 'pure engine, no cache on either side',
     original: () => {
-      for (const p of corpus) origMM.match(p);
+      for (let r = 0; r < INNER_REPEAT; r++)
+        for (const p of corpus) origMM.match(p);
     },
     fast: () => {
-      for (const p of corpus) fastMM.match(p);
+      for (let r = 0; r < INNER_REPEAT; r++)
+        for (const p of corpus) fastMM.match(p);
     },
   };
 }
@@ -214,10 +225,12 @@ function warmFunctionScenario(pattern: string): Scenario {
     title: `warm function "${pattern}"`,
     note: 'function API with LRU cache (real-world globbing)',
     original: () => {
-      for (const p of corpus) originalMinimatch(p, pattern);
+      for (let r = 0; r < INNER_REPEAT; r++)
+        for (const p of corpus) originalMinimatch(p, pattern);
     },
     fast: () => {
-      for (const p of corpus) fastMinimatch(p, pattern);
+      for (let r = 0; r < INNER_REPEAT; r++)
+        for (const p of corpus) fastMinimatch(p, pattern);
     },
   };
 }

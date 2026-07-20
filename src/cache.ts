@@ -69,43 +69,63 @@ function fnId(fn: unknown): string | number {
  * @returns A unique cache key string
  */
 function getCacheKey(pattern: string, options: MinimatchOptions): string {
-  // Use null byte as separator (cannot appear in patterns).
-  // JSON.stringify handles arrays (ignore) and undefined uniformly.
-  return `${pattern}\0${JSON.stringify([
-    options.nocase,
-    options.dot,
-    options.noglobstar,
-    options.nobrace,
-    options.noext,
-    options.nonegate,
-    options.nocomment,
-    options.matchBase,
-    options.flipNegate,
-    options.windowsPathsNoEscape,
-    options.allowWindowsEscape,
-    options.preserveMultipleSlashes,
-    options.partial,
-    options.platform,
-    options.magicalBraces,
-    options.nocaseMagicOnly,
-    options.optimizationLevel,
-    options.windowsNoMagicRoot,
-    options.ignore,
-    options.maxLength,
-    options.bash,
-    options.contains,
-    options.flags,
-    options.strictBrackets,
-    options.literalBrackets,
-    options.keepQuotes,
-    options.unescape,
+  // Manual concatenation: measurably cheaper than JSON.stringify per call,
+  // and this runs on every cache lookup (hot path for cold workloads).
+  // Options that do NOT affect results (debug, nonull, failglob) are
+  // intentionally excluded.
+  const ignore = options.ignore;
+  return (
+    pattern +
+    '\0' +
+    (options.nocase ? '1' : '0') +
+    (options.dot ? '1' : '0') +
+    (options.noglobstar ? '1' : '0') +
+    (options.nobrace ? '1' : '0') +
+    (options.noext ? '1' : '0') +
+    (options.nonegate ? '1' : '0') +
+    (options.nocomment ? '1' : '0') +
+    (options.matchBase ? '1' : '0') +
+    (options.flipNegate ? '1' : '0') +
+    (options.windowsPathsNoEscape ? '1' : '0') +
+    (options.allowWindowsEscape ? '1' : '0') +
+    (options.preserveMultipleSlashes ? '1' : '0') +
+    (options.partial ? '1' : '0') +
+    (options.magicalBraces ? '1' : '0') +
+    (options.nocaseMagicOnly ? '1' : '0') +
+    (options.bash ? '1' : '0') +
+    (options.contains ? '1' : '0') +
+    (options.strictBrackets ? '1' : '0') +
+    (options.literalBrackets ? '1' : '0') +
+    (options.keepQuotes ? '1' : '0') +
+    (options.unescape ? '1' : '0') +
+    '|' +
+    (options.platform ?? '') +
+    '|' +
+    (options.optimizationLevel ?? '') +
+    '|' +
+    (options.windowsNoMagicRoot ?? '') +
+    '|' +
+    (options.maxLength ?? '') +
+    '|' +
+    (options.flags ?? '') +
+    '|' +
+    (ignore === undefined
+      ? ''
+      : Array.isArray(ignore)
+        ? ignore.join('\x01')
+        : ignore) +
+    '|' +
     // Function-valued options: keyed by identity
-    fnId(options.expandRange),
-    fnId(options.format),
-    fnId(options.onMatch),
-    fnId(options.onIgnore),
-    fnId(options.onResult),
-  ])}`;
+    fnId(options.expandRange) +
+    '|' +
+    fnId(options.format) +
+    '|' +
+    fnId(options.onMatch) +
+    '|' +
+    fnId(options.onIgnore) +
+    '|' +
+    fnId(options.onResult)
+  );
 }
 
 /**

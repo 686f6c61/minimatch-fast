@@ -65,8 +65,22 @@ export class Minimatch {
   /** Options used for matching */
   options: MinimatchOptions;
 
-  /** 2D array of parsed pattern parts after brace expansion */
-  set: ParseReturnFiltered[][];
+  /** 2D array of parsed pattern parts after brace expansion (computed lazily on first access) */
+  private _set: ParseReturnFiltered[][] | null = null;
+
+  /**
+   * 2D array of parsed pattern parts after brace expansion.
+   * Computed lazily: building it requires one regex per pattern part, which
+   * matching itself does not need (matchers are compiled separately).
+   */
+  get set(): ParseReturnFiltered[][] {
+    if (this._set === null) {
+      this._set = this.globParts
+        .map((parts) => parts.map((part) => this.parse(part)))
+        .filter((s) => s.indexOf(false) === -1) as ParseReturnFiltered[][];
+    }
+    return this._set;
+  }
 
   /** Whether the pattern is negated (starts with !) */
   negate: boolean;
@@ -114,6 +128,8 @@ export class Minimatch {
   private _picoOpts: PicomatchOptions;
   private _matchers: Array<(str: string) => boolean>;
   private _debugFn: (...args: unknown[]) => void;
+  // When false, debug call sites are skipped entirely (no arg array allocation)
+  private _debugOn = false;
 
   // Cached computed values for performance
   private _hasNegatedCharClassCached: boolean;
@@ -180,7 +196,6 @@ export class Minimatch {
 
     this.globSet = [];
     this.globParts = [];
-    this.set = [];
     this._matchers = [];
 
     // Debug function (no-op by default)
@@ -237,6 +252,7 @@ export class Minimatch {
     // Handle debug mode
     if (options.debug) {
       this._debugFn = (...args: unknown[]) => console.error(...args);
+      this._debugOn = true;
     }
 
     // Comments match nothing
@@ -257,7 +273,7 @@ export class Minimatch {
     // Expand braces
     this.globSet = [...new Set(this.braceExpand())];
 
-    this.debug(this.pattern, this.globSet);
+    if (this._debugOn) this.debug(this.pattern, this.globSet);
 
     // Split into path parts
     const rawGlobParts = this.globSet.map((s) => this.slashSplit(s));
@@ -265,7 +281,7 @@ export class Minimatch {
     // Apply preprocessing (optimization, normalization)
     this.globParts = this.preprocess(rawGlobParts);
 
-    this.debug(this.pattern, this.globParts);
+    if (this._debugOn) this.debug(this.pattern, this.globParts);
 
     // Create matchers for the expanded patterns.
     // Strategy (fastest first):
@@ -321,14 +337,9 @@ export class Minimatch {
       });
     }
 
-    // Convert to pattern set for internal use
-    this.set = this.globParts
-      .map((parts) => {
-        return parts.map((part) => this.parse(part));
-      })
-      .filter((s) => s.indexOf(false) === -1) as ParseReturnFiltered[][];
-
-    this.debug(this.pattern, this.set);
+    // Note: this.set is computed lazily on first access (see the getter).
+    // Building it eagerly would cost one regex compilation per pattern part
+    // on every Minimatch construction, even though matching never uses it.
   }
 
   /**
@@ -475,7 +486,7 @@ export class Minimatch {
    * @returns true if the path matches
    */
   match(path: string, partial: boolean = this.partial): boolean {
-    this.debug('match', path, this.pattern);
+    if (this._debugOn) this.debug('match', path, this.pattern);
 
     // Comments never match
     if (this.comment) {
@@ -699,7 +710,7 @@ export class Minimatch {
   ): boolean {
     const options = this.options;
 
-    this.debug('matchOne', { file, pattern, partial });
+    if (this._debugOn) this.debug('matchOne', { file, pattern, partial });
 
     // Traverse both arrays simultaneously
     let fi = 0;
@@ -711,7 +722,7 @@ export class Minimatch {
       const p = pattern[pi];
       const f = file[fi];
 
-      this.debug('matchOne loop', { fi, pi, f, p });
+      if (this._debugOn) this.debug('matchOne loop', { fi, pi, f, p });
 
       // Invalid pattern part
       if (p === false) {
@@ -720,12 +731,12 @@ export class Minimatch {
 
       // Globstar handling
       if (p === GLOBSTAR) {
-        this.debug('GLOBSTAR', { pi, fl, fi });
+        if (this._debugOn) this.debug('GLOBSTAR', { pi, fl, fi });
 
         // Handle ** at the end
         const pr = pi + 1;
         if (pr === pl) {
-          this.debug('** at end');
+          if (this._debugOn) this.debug('** at end');
           // ** at the end swallows everything except . and ..
           for (; fi < fl; fi++) {
             if (
@@ -743,11 +754,11 @@ export class Minimatch {
         let fr = fi;
         while (fr < fl) {
           const swallowee = file[fr];
-          this.debug('globstar while', { swallowee, fr, fl });
+          if (this._debugOn) this.debug('globstar while', { swallowee, fr, fl });
 
           // Try matching the rest
           if (this.matchOne(file.slice(fr), pattern.slice(pr), partial)) {
-            this.debug('globstar found match!', fr, fl, swallowee);
+            if (this._debugOn) this.debug('globstar found match!', fr, fl, swallowee);
             return true;
           }
 
@@ -757,7 +768,7 @@ export class Minimatch {
             swallowee === '..' ||
             (!options.dot && swallowee!.charAt(0) === '.')
           ) {
-            this.debug('dot detected!', file, fr, pattern, pi);
+            if (this._debugOn) this.debug('dot detected!', file, fr, pattern, pi);
             break;
           }
 
@@ -777,10 +788,10 @@ export class Minimatch {
 
       if (typeof p === 'string') {
         hit = f === p;
-        this.debug('string match', p, f, hit);
+        if (this._debugOn) this.debug('string match', p, f, hit);
       } else {
         hit = p.test(f!);
-        this.debug('pattern match', p, f, hit);
+        if (this._debugOn) this.debug('pattern match', p, f, hit);
       }
 
       if (!hit) {
