@@ -20,7 +20,7 @@ The key benefits are:
 - **Performance**: **6-25x faster** than minimatch for most patterns
 - **Security**: Not vulnerable to CVE-2022-3517 (ReDoS attack) that affected minimatch
 - **Stability**: No freezing on large brace ranges like `{1..1000}`
-- **Compatibility**: Passes 100% of minimatch's original test suite (378 tests)
+- **Compatibility**: Passes 100% of minimatch's original test suite (402 tests)
 - **POSIX Classes**: Full support for `[[:alpha:]]`, `[[:digit:]]`, `[[:alnum:]]`, and more
 - **Unicode**: Complete Unicode support including CJK characters and emoji
 - **Regex Safety**: Not affected by Issue #273 (invalid regex with commas in character classes)
@@ -351,7 +351,7 @@ minimatch.braceExpand('file{1..10}.txt');
 
 #### `minimatch.escape(str, [options])`
 
-Escapes all glob special characters in a string so that they are matched literally instead of being interpreted as pattern syntax. This is essential when you need to match file paths that contain characters like `*`, `?`, `[`, `]`, `{`, or `}` as literal characters.
+Escapes all glob special characters in a string so that they are matched literally instead of being interpreted as pattern syntax. This is essential when you need to match file paths that contain characters like `*`, `?`, `[`, or `]` as literal characters. Braces (`{` and `}`) are only escaped when the `magicalBraces` option is set, matching the behavior of the original minimatch.
 
 This function is particularly important when dealing with user input or dynamically generated paths that might accidentally contain glob metacharacters. Without escaping, a filename like `file[1].txt` would be interpreted as a character class pattern rather than a literal filename.
 
@@ -361,7 +361,7 @@ The escape method varies based on the `windowsPathsNoEscape` option:
 
 **Parameters:**
 - `str` (string): The string to escape
-- `options` (object, optional): Set `windowsPathsNoEscape: true` for Windows-style escaping
+- `options` (object, optional): Set `windowsPathsNoEscape: true` for Windows-style escaping, or `magicalBraces: true` to also escape `{` and `}`
 
 **Returns:** `string` - The escaped string safe for use as a literal pattern
 
@@ -374,8 +374,8 @@ minimatch.escape('*.js');
 minimatch.escape('file[1].txt');
 // Returns: 'file\\[1\\].txt'
 
-// Escaping braces
-minimatch.escape('config.{json,yaml}');
+// Escaping braces (requires magicalBraces, like the original minimatch)
+minimatch.escape('config.{json,yaml}', { magicalBraces: true });
 // Returns: 'config.\\{json,yaml\\}'
 
 // Using escaped pattern for literal matching
@@ -403,7 +403,7 @@ This function is helpful in scenarios where you need to show users the original 
 
 **Parameters:**
 - `str` (string): The escaped string to unescape
-- `options` (object, optional): Set `windowsPathsNoEscape: true` if the string was escaped in Windows mode
+- `options` (object, optional): Set `windowsPathsNoEscape: true` if the string was escaped in Windows mode. Brace escapes (`\{` and `\}`) are removed by default; set `magicalBraces: false` to leave them in place
 
 **Returns:** `string` - The unescaped original string
 
@@ -958,13 +958,14 @@ minimatch('foo.txt', '!*.txt'); // false (is a .txt file)
 
 ### Test Suite
 
-Our test suite consists of **378 tests** organized into five categories:
+Our test suite consists of **402 tests** organized into six categories:
 
 1. **Unit Tests (42 tests)**: Core functionality and API tests
 2. **Edge Case Tests (64 tests)**: Windows paths, extended options, dotfiles, extglob
 3. **Security Tests (23 tests)**: CVE-2022-3517 regression, pattern limits, input validation
 4. **Exhaustive Compatibility Tests (196 tests)**: All patterns from minimatch's original `patterns.js` test file
 5. **Verification Tests (53 tests)**: POSIX character classes, Unicode support, regex edge cases
+6. **Regression Tests (24 tests)**: Cache correctness, `hasMagic()`, `makeRe()` negation, escape/unescape alignment
 
 ### How We Test Compatibility
 
@@ -1135,7 +1136,7 @@ cd minimatch-fast
 npm install
 
 # Run tests
-npm test                 # All tests (378 tests)
+npm test                 # All tests (402 tests)
 npm run test:compat     # Compatibility tests only (196 tests)
 npm run benchmark       # Performance benchmarks
 

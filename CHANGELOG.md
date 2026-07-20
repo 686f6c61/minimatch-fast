@@ -15,6 +15,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-20
+
+### Fixed
+
+- **Cache key**: The pattern cache now includes every option that affects compilation or matching (`contains`, `bash`, `flags`, `ignore`, `maxLength`, `strictBrackets`, `literalBrackets`, `keepQuotes`, `unescape`, `magicalBraces`, and more). Previously, calls with the same pattern but different options could incorrectly reuse a cached matcher. Function-valued options (`format`, `expandRange`, callbacks) are keyed by identity
+- **`hasMagic()`**: Now returns `false` for literal patterns (e.g., `'foo.js'`), matching minimatch. Previously it always returned `true` because every pattern part was compiled to a regex
+- **`makeRe()`**: Negated patterns (e.g., `'!*.js'`) now produce a regex that matches everything *except* the pattern (`^(?!...).+$`), matching minimatch. Previously the negation was silently dropped
+- **`nonull` option**: `minimatch.match()` now reads `nonull` from the caller's options instead of the cached instance, so cache hits no longer leak behavior between calls with different options
+- **`.`/`..` handling**: Replaced fragile substring heuristic with an explicit check against the expanded pattern set. Behavior is unchanged for valid inputs
+- **Tests**: Fixed `magicalBraces` test that encoded the incorrect `hasMagic()` behavior
+
+### Changed
+
+- **`escape()`/`unescape()`**: Now 1:1 aligned with minimatch. Braces (`{` and `}`) are only escaped when `magicalBraces: true` is set (previously they were always escaped). `unescape()` removes brace escapes by default unless `magicalBraces: false`
+- **Fast paths**: Disabled when options they cannot honor are present (`flags`, `ignore`, `format`, `contains`, `bash`, `keepQuotes`, `unescape`, `strictBrackets`, `literalBrackets`, `expandRange`, callbacks, `partial`), falling back to the full matching engine
+
+### Security
+
+- **`maxLength` enforcement**: Pattern length is now also validated before fast-path matching (fast paths previously skipped the `Minimatch` constructor, where validation happened)
+
+### Internal
+
+- Added 24 regression tests covering all fixed bugs (402 total tests)
+- Consistent `.js` extension in type-only imports
+
 ## [0.3.2] - 2026-04-06
 
 ### Changed
