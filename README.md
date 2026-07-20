@@ -17,7 +17,7 @@
 
 The key benefits are:
 
-- **Performance**: **3-29x faster** in real-world repeated matching (same patterns against many files) thanks to the LRU pattern cache
+- **Performance**: **up to 36x faster** in real-world repeated matching (same patterns against many files) thanks to the LRU pattern cache and early rejection of non-matching paths
 - **Security**: Not vulnerable to CVE-2022-3517 (ReDoS attack) that affected minimatch
 - **Stability**: No freezing on large brace ranges like `{1..1000}`
 - **Compatibility**: Passes 100% of minimatch's original test suite (402 tests)
@@ -29,19 +29,21 @@ Honest benchmarks (Node 22, median of 15 rounds, A/B/B/A interleaved — see [Be
 
 | Scenario | minimatch | minimatch-fast |
 |--------|-----------|----------------|
-| Warm function API, `{src,lib}/**/*.{js,ts,tsx}` (real-world globbing) | Baseline | **29x faster** |
-| Warm function API, `@(foo\|bar\|baz).js` | Baseline | **8.7x faster** |
-| Warm function API, `*.js` / `**/*.js` | Baseline | **3-3.3x faster** |
-| Pre-compiled engine, common patterns | Baseline | **2-6.2x faster** |
-| Pre-compiled engine, simple 2-way braces | Baseline | 0.65x (slower, see notes) |
-| Cold single calls | Baseline | ~parity to 2.3x |
+| Warm function API, `@(foo\|bar\|baz).js` (real-world globbing) | Baseline | **~190x faster** |
+| Warm function API, `*.js` | Baseline | **~64x faster** |
+| Warm function API, `{src,lib}/**/*.{js,ts,tsx}` | Baseline | **36x faster** |
+| Pre-compiled engine, common patterns | Baseline | **2.4-12x faster** |
+| Cold single calls, slashless patterns | Baseline | **~20-105x faster** (early rejection) |
+| Cold single calls, globstar patterns | Baseline | **1.1-1.9x faster** |
 | CVE-2022-3517 (ReDoS) | Affected | **Not affected** |
 | Freezes on `{1..1000}` | Yes | **No** |
-| Engine | regex-based | picomatch + LRU cache |
+| Engine | regex-based | picomatch + LRU cache + early rejection |
 
 Where minimatch-fast wins: matching the same patterns against many files
 (the actual glob workload in build tools, linters and CLIs), where its LRU
-cache avoids recompiling patterns. minimatch recompiles on every call.
+cache avoids recompiling patterns (minimatch recompiles on every call),
+and rejecting non-matching nested paths for slashless patterns without
+compiling anything (early rejection).
 
 ## Installation
 
@@ -1022,34 +1024,42 @@ We benchmark minimatch-fast against minimatch with a methodology designed to avo
 - **Deterministic corpus**: 1000 repo-like paths generated from a fixed seed
 - **Four scenarios measured separately**, because "which is faster" depends on how the library is used
 
-### Results (Node.js 22, Linux, median of 15 rounds)
+### Results (Node.js 22, Linux, median of 21 rounds, stable across 3 consecutive runs)
 
 ```
 scenario                                       minimatch  minimatch-fast  speedup
 ──────────────────────────────────────────────────────────────────────────────────
-compile "{src,lib}/**/*.{js,ts,tsx}"              2.0ms          0.72ms    2.8x
-compile "*.js" / "**/*.js" / extglob              ~0.5ms         ~0.5ms     ~1x
+compile "{src,lib}/**/*.{js,ts,tsx}"              8.4ms          1.5ms     5.7x
+compile "@(foo|bar|baz).js"                       2.4ms          0.8ms     3.0x
+compile "*.js"                                    1.15ms         0.5ms     2.3x
+compile "**/*.js"                                 0.86ms         0.53ms    1.6x
 
-precompiled match "file[0-9].js"                  0.22ms         0.04ms    6.2x
-precompiled match "@(foo|bar|baz).js"             0.13ms         0.04ms    3.6x
-precompiled match "{src,lib}/**/*.{js,ts,tsx}"    0.17ms         0.05ms    3.4x
-precompiled match "*.js" / "**/*.js"              ~0.22ms        ~0.08ms    2.6x
-precompiled match "???.js" / "!*.test.js"         ~0.09ms        ~0.04ms    2.1-2.5x
-precompiled match "{src,lib}/*.js"                0.10ms         0.15ms    0.65x (slower)
+precompiled match "file[0-9].js"                  0.60ms         0.05ms   12x
+precompiled match "@(foo|bar|baz).js"             0.60ms         0.05ms   12x
+precompiled match "*.js" / "!*.test.js" / "???"   ~0.45ms        ~0.05ms   8-9x
+precompiled match "{src,lib}/**/*.{js,ts,tsx}"    0.85ms         0.25ms    3.4x
+precompiled match "**/*.js" / "**/**/**/*.js"     ~1.0ms         ~0.35ms   2.7x
+precompiled match "{src,lib}/*.js"                0.47ms         0.20ms    2.4x
 
-end-to-end cold (every call compiles)             ~2-19ms        ~2-8ms     parity to 2.3x
+end-to-end cold "@(foo|bar|baz).js"               5.0ms          0.05ms  ~105x
+end-to-end cold "*.js"                            1.8ms          0.08ms  ~20x
+end-to-end cold "{src,lib}/**/*.{js,ts,tsx}"     18.8ms          4.6ms    4x
+end-to-end cold "**/*.js"                         2.1ms          1.6ms    1.1-1.9x
 
-warm function "*.js"                              1.87ms         0.61ms    3.1x
-warm function "**/*.js"                           2.00ms         0.60ms    3.3x
-warm function "@(foo|bar|baz).js"                 5.05ms         0.58ms    8.7x
-warm function "{src,lib}/**/*.{js,ts,tsx}"       17.5ms          0.60ms   29x
+warm function "@(foo|bar|baz).js"                25.5ms          0.13ms  ~190x
+warm function "*.js"                              9.2ms          0.14ms  ~64x
+warm function "{src,lib}/**/*.{js,ts,tsx}"       88.0ms          2.4ms   36x
+warm function "**/*.js"                           9.9ms          2.4ms    4.3x
 ```
+
+Geometric mean across all 21 scenarios: **~7.5x**.
 
 ### How to read this
 
 - **Warm function API** is the real-world glob workload: build tools, linters and CLIs match the same handful of patterns against thousands of files. minimatch recompiles the pattern on every call; minimatch-fast keeps compiled patterns in a 500-entry LRU cache. This asymmetry is a feature of the library, disclosed explicitly — not a benchmark trick.
-- **Pre-compiled matching** is the honest engine-vs-engine comparison (no cache on either side). minimatch-fast compiles brace patterns natively into a single regex and combines multiple expansions into one matcher, winning 2-6x on most pattern shapes. The one remaining slower case is the simple 2-way brace (`{src,lib}/*.js`, 0.65x) where minimatch's regex is unusually efficient; at ~150ns per call the absolute gap is small.
-- **Cold single calls** are parity or better: both compile the pattern per call.
+- **Early rejection** explains the largest cold/warm numbers: a pattern without `/`, `**` or `{}` can never match a path containing a slash, so minimatch-fast answers immediately without compiling or running any regex. The corpus consists of nested repo paths, which is where this fires. Skipped automatically when semantics change (negation, `matchBase`, `partial`, `contains`, `bash`, `format`).
+- **Pre-compiled matching** is the honest engine-vs-engine comparison (no cache, no early-exit shortcuts beyond the equivalent-rejection rule): 2.4-12x across all measured pattern shapes. Brace patterns compile natively into a single regex; multiple expansions share one matcher.
+- **Cold `**/*.js`** is the toughest case: both sides pay full pattern compilation per call, and picomatch's globstar compile is the floor. Still faster (1.1-1.9x), but closest to parity.
 
 ### Running Benchmarks
 

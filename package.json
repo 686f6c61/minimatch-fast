@@ -1,8 +1,8 @@
 {
   "name": "minimatch-fast",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "type": "module",
-  "description": "Drop-in replacement for minimatch. Up to 29x faster. Powered by picomatch.",
+  "description": "Drop-in replacement for minimatch. Up to 36x faster. Powered by picomatch.",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/cjs/index.d.ts",

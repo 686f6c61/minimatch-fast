@@ -13,19 +13,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.4.1] - 2026-07-20
 
 ### Performance
 
-- **Brace patterns**: compiled natively into a single regex (picomatch accepts braces directly) instead of one matcher per expansion. Complex braces went from 0.43x (3x slower than minimatch) to **3.4x faster**; warm brace matching from 17x to **29x**
+- **Early rejection**: patterns without `/`, `**` or `{}` can never match paths containing a slash, so they are now answered immediately without compiling or running any regex (checked on the trailing-slash-trimmed path; skipped for negation, `matchBase`, `partial`, `contains`, `bash`, `format`). Warm `*.js` went from 3.9x to **~64x**, warm extglob to **~190x**, cold `*.js` to **~20x**
+- **Brace patterns**: compiled natively into a single regex instead of one matcher per expansion. Complex braces went from 0.43x (3x slower than minimatch) to **3.4x faster**
 - **Multiple expansions**: combined into a single picomatch matcher (array compilation) instead of N separate matchers looped with `.some()`
-- **match() hot path**: eliminated double matcher invocation on misses (trailing-slash variant was always tried, even when identical), replaced `.some()` closures with a plain loop, and basename is now only computed when actually needed
-- Engine-vs-engine (precompiled, no cache): now 2-6x faster than minimatch on most pattern shapes
-- Benchmark rewritten with unbiased methodology: A/B/B/A interleaving, warmup discarded, medians over 15 rounds, deterministic 1000-path corpus, four scenarios (compile / precompiled / cold / warm)
+- **Constructor**: `set` is computed lazily on first access (was one regex compilation per pattern part on every construction); debug calls guarded behind a flag (allocated an args array on every `match()`); cache key built with manual concatenation instead of `JSON.stringify`; no options object allocated for `minimatch(path, pattern)` calls
+- **match() hot path**: eliminated double matcher invocation on misses, replaced `.some()` closures with a plain loop, basename only computed when needed
+- Every one of the 21 benchmark scenarios now beats minimatch, verified across 3 consecutive runs (1.12x - 190x, geometric mean ~7.5x)
+- Benchmark rewritten with unbiased methodology: A/B/B/A interleaving, warmup discarded, medians over 21 rounds, deterministic 1000-path corpus, four scenarios (compile / precompiled / cold / warm)
 
 ### Changed
 
-- **Honest metrics**: replaced unverifiable "6-25x faster" claims with measured "up to 29x faster" (warm real-world workload); README benchmark section documents the full methodology and the one remaining slower case (simple 2-way braces, 0.65x)
+- **Honest metrics**: replaced unverifiable "6-25x faster" claims with measured "up to 36x faster"; README benchmark section documents the full methodology, the early-rejection mechanism and the toughest case (cold globstar)
 
 ## [0.4.0] - 2026-07-20
 
