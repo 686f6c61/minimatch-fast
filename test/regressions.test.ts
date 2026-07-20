@@ -176,3 +176,50 @@ describe('Regression: matchOne with literal string parts', () => {
     expect(mm.matchOne(['foo', 'baz'], mm.set[0]!, false)).toBe(false);
   });
 });
+
+describe('Regression: early rejection of slashless patterns', () => {
+  beforeEach(() => {
+    minimatch.clearCache();
+  });
+
+  it('slashless patterns must not match nested paths', () => {
+    expect(minimatch('src/foo.js', '*.js')).toBe(false);
+    expect(minimatch('a/b/c.txt', '*.txt')).toBe(false);
+    expect(new Minimatch('*.js').match('src/foo.js')).toBe(false);
+  });
+
+  it('but they must match bare filenames', () => {
+    expect(minimatch('foo.js', '*.js')).toBe(true);
+    expect(new Minimatch('*.js').match('foo.js')).toBe(true);
+  });
+
+  it('trailing slash paths may still match slashless patterns', () => {
+    // 'bdir/' matches [a-y]*[^c] through its trimmed form (compat suite #8)
+    expect(minimatch('bdir/', '[a-y]*[^c]')).toBe(true);
+    expect(new Minimatch('[a-y]*[^c]').match('bdir/')).toBe(true);
+  });
+
+  it('globstar and brace patterns are not early-rejected', () => {
+    expect(minimatch('a/b/c', '**')).toBe(true);
+    expect(minimatch('b/c', '{a,b/c}')).toBe(true);
+    expect(minimatch('src/foo.js', '**/*.js')).toBe(true);
+  });
+
+  it('negated slashless patterns still invert correctly', () => {
+    expect(minimatch('src/foo.js', '!*.js')).toBe(true);
+    expect(minimatch('src/foo.js', '!*.js', { flipNegate: true })).toBe(false);
+  });
+
+  it('contains, bash and format options bypass early rejection', () => {
+    expect(minimatch('foo/bar/baz', 'bar', { contains: true })).toBe(true);
+    expect(minimatch('a/b/c', '*', { bash: true })).toBe(true);
+    const strip = (s: string) => s.replace(/^\.\//, '');
+    expect(minimatch('./foo', 'foo', { format: strip })).toBe(true);
+  });
+
+  it('matchBase and partial bypass early rejection', () => {
+    expect(minimatch('src/foo.js', '*.js', { matchBase: true })).toBe(true);
+    // Root always matches in partial mode
+    expect(minimatch('/', 'src/*', { partial: true })).toBe(true);
+  });
+});

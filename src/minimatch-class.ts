@@ -134,6 +134,9 @@ export class Minimatch {
   // Cached computed values for performance
   private _hasNegatedCharClassCached: boolean;
   private _requiresTrailingSlashCached: boolean;
+  // Whether any expanded glob can match across directory boundaries.
+  // When false, paths containing '/' can be rejected immediately.
+  private _canCrossSlashes = true;
 
   /**
    * Create a new Minimatch instance
@@ -212,6 +215,12 @@ export class Minimatch {
     // These are used in match() and would otherwise be computed on every call
     this._hasNegatedCharClassCached = /\[\^[^\]]+\]/.test(this.pattern);
     this._requiresTrailingSlashCached = /\*\*\/\.[^/]+\/\*\*/.test(this.pattern);
+
+    // Computed after make() so globSet is final (braces already expanded:
+    // '{a,b/c}' correctly reports true via its 'b/c' expansion)
+    this._canCrossSlashes = this.globSet.some(
+      (g) => g.includes('/') || g.includes('**')
+    );
   }
 
   /**
@@ -510,6 +519,30 @@ export class Minimatch {
 
     const matchBase = this.options.matchBase;
 
+    // Handle trailing slashes in path
+    // minimatch treats 'dir/' as equivalent to 'dir' when pattern doesn't end with /
+    const pathWithoutTrailingSlash = path.endsWith('/') && path.length > 1
+      ? path.slice(0, -1)
+      : path;
+
+    // Early rejection: patterns that cannot cross directory boundaries never
+    // match paths containing a slash. Answers the most common globbing case
+    // (non-matching paths in nested directories) without running any regex.
+    // Checked on the trimmed path ('dir/' can still match a slashless
+    // pattern) and skipped for options that alter matching semantics
+    // (contains, bash, format).
+    if (
+      !matchBase &&
+      !partial &&
+      !this.options.contains &&
+      !this.options.bash &&
+      !this.options.format &&
+      !this._canCrossSlashes &&
+      pathWithoutTrailingSlash.includes('/')
+    ) {
+      return this.options.flipNegate ? false : this.negate;
+    }
+
     // minimatch compatibility: '.' and '..' are never matched by wildcards,
     // even with dot:true. They only match when an expanded pattern
     // explicitly ends with that literal segment.
@@ -528,12 +561,6 @@ export class Minimatch {
         }
       }
     }
-
-    // Handle trailing slashes in path
-    // minimatch treats 'dir/' as equivalent to 'dir' when pattern doesn't end with /
-    const pathWithoutTrailingSlash = path.endsWith('/') && path.length > 1
-      ? path.slice(0, -1)
-      : path;
 
     // Use picomatch matchers for fast matching
     let matches = false;

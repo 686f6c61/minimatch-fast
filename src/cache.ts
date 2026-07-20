@@ -129,6 +129,21 @@ function getCacheKey(pattern: string, options: MinimatchOptions): string {
 }
 
 /**
+ * Suffix for the default (empty) options object, computed once from
+ * getCacheKey itself so the two key shapes can never drift apart.
+ */
+const DEFAULT_KEY_SUFFIX = getCacheKey('', {});
+
+/**
+ * True when the options object has no own keys (the most common case:
+ * minimatch(path, pattern) with no third argument).
+ */
+function isEmptyOptions(options: MinimatchOptions): boolean {
+  for (const _ in options) return false;
+  return true;
+}
+
+/**
  * Get a cached Minimatch instance or create a new one.
  * Implements LRU eviction when cache is full.
  *
@@ -140,7 +155,10 @@ export function getOrCreateMatcher(
   pattern: string,
   options: MinimatchOptions
 ): Minimatch {
-  const key = getCacheKey(pattern, options);
+  // Fast path: default options need no key building at all
+  const key = isEmptyOptions(options)
+    ? pattern + DEFAULT_KEY_SUFFIX
+    : getCacheKey(pattern, options);
 
   // Check cache first
   let mm = patternCache.get(key);

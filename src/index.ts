@@ -99,10 +99,16 @@ export const sep: Sep = pathSep;
  * minimatch('.hidden', '*', { dot: true }); // true
  * ```
  */
+/**
+ * Shared frozen empty-options object: avoids allocating a fresh `{}`
+ * on every minimatch(path, pattern) call (the hottest entry point).
+ */
+const NO_OPTIONS: MinimatchOptions = Object.freeze({});
+
 export function minimatch(
   path: string,
   pattern: string,
-  options: MinimatchOptions = {}
+  options: MinimatchOptions = NO_OPTIONS
 ): boolean {
   // Validate input types
   if (typeof path !== 'string') {
@@ -131,6 +137,30 @@ export function minimatch(
       `This limit exists to prevent ReDoS attacks. ` +
       `Use options.maxLength to increase if needed.`
     );
+  }
+
+  // Early rejection: a pattern without slashes, globstar or braces can never
+  // match a path that contains a slash (a single pattern segment cannot cross
+  // directory boundaries). This lets us answer immediately for the most
+  // common globbing case - non-matching paths in nested directories - without
+  // compiling anything. Skipped for negated patterns (their result inverts),
+  // matchBase (matches against basename), partial (prefix semantics), and
+  // contains/bash/format (they alter what can match or the string matched).
+  // The check runs on the trailing-slash-trimmed path: 'dir/' may still
+  // match a slashless pattern via its trimmed form.
+  if (
+    !options.matchBase &&
+    !options.partial &&
+    !options.contains &&
+    !options.bash &&
+    !options.format &&
+    !(pattern.charAt(0) === '!' && !options.nonegate) &&
+    !pattern.includes('/') &&
+    !pattern.includes('**') &&
+    !pattern.includes('{') &&
+    (path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path).includes('/')
+  ) {
+    return false;
   }
 
   // Try fast path for simple patterns (no path separators, no complex features)

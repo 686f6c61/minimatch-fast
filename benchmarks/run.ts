@@ -177,10 +177,10 @@ function compileScenario(pattern: string): Scenario {
   return {
     title: `compile "${pattern}"`,
     original: () => {
-      for (let i = 0; i < 100; i++) new OriginalMinimatch(pattern);
+      for (let i = 0; i < 500; i++) new OriginalMinimatch(pattern);
     },
     fast: () => {
-      for (let i = 0; i < 100; i++) new Minimatch(pattern);
+      for (let i = 0; i < 500; i++) new Minimatch(pattern);
     },
   };
 }
