@@ -3,19 +3,22 @@ import GitHub from './icons/GitHub.astro';
 import Arrow from './icons/Arrow.astro';
 ---
 
-<section class="hero">
+<section class="hero fade-in">
   <div class="container">
     <div class="hero-content">
+      <span class="badge-live">v0.4.0 live on npm</span>
+
       <h1 class="hero-title">minimatch-fast</h1>
-      <p class="hero-subtitle">
+
+      <p class="narrative hero-subtitle">
         Drop-in replacement for minimatch.<br />
-        <strong>6-25x faster.</strong> Zero vulnerabilities.
+        6-25x faster. Zero vulnerabilities.
       </p>
 
       <div class="hero-install">
         <code class="install-command">npm install minimatch-fast</code>
         <button class="copy-btn" data-code="npm install minimatch-fast" aria-label="Copy install command">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
           </svg>
@@ -23,15 +26,23 @@ import Arrow from './icons/Arrow.astro';
       </div>
 
       <div class="hero-actions">
-        <a href="#install" class="btn btn-primary">
+        <a href="#install" class="btn primary">
           Get Started
-          <Arrow size={16} />
+          <Arrow size={14} />
         </a>
-        <a href="https://github.com/686f6c61/minimatch-fast" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">
-          <GitHub size={18} />
+        <a href="https://github.com/686f6c61/minimatch-fast" class="btn" target="_blank" rel="noopener noreferrer">
+          <GitHub size={14} />
           GitHub
         </a>
       </div>
+
+      <ul class="chips hero-chips">
+        <li class="chip">picomatch engine</li>
+        <li class="chip">100% API compatible</li>
+        <li class="chip">TypeScript</li>
+        <li class="chip">ESM + CJS</li>
+        <li class="chip">402 tests</li>
+      </ul>
 
       <p class="hero-license">
         <a href="https://github.com/686f6c61/minimatch-fast/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">
@@ -44,127 +55,78 @@ import Arrow from './icons/Arrow.astro';
 
 <style>
   .hero {
-    padding: 6rem 0;
-    text-align: center;
-    background: linear-gradient(180deg, var(--gray-50) 0%, var(--white) 100%);
+    padding: var(--space-lg) 0;
   }
 
   .hero-content {
-    max-width: 700px;
-    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
   }
 
   .hero-title {
-    font-size: 4rem;
-    font-family: var(--font-mono);
-    margin-bottom: 1.5rem;
-    letter-spacing: -0.02em;
+    margin-bottom: 0;
   }
 
   .hero-subtitle {
-    font-size: 1.5rem;
-    color: var(--gray-600);
-    margin-bottom: 2rem;
-    line-height: 1.4;
-  }
-
-  .hero-subtitle strong {
-    color: var(--black);
+    margin-bottom: 0;
+    color: var(--text);
   }
 
   .hero-install {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background-color: var(--gray-100);
-    border: 1px solid var(--black);
-    border-radius: 8px;
-    margin-bottom: 2rem;
+    gap: .5rem;
+    padding: .6rem .8rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    max-width: 100%;
   }
 
   .install-command {
-    font-family: var(--font-mono);
-    font-size: 1rem;
+    font-size: .85rem;
     background: none;
     border: none;
     padding: 0;
+    overflow-x: auto;
+    white-space: nowrap;
   }
 
   .copy-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.375rem;
+    padding: .3rem;
     background: none;
-    border: 1px solid var(--gray-300);
+    border: 1px solid var(--border);
     border-radius: 4px;
     cursor: pointer;
-    color: var(--gray-500);
-    transition: all 0.15s ease;
+    color: var(--text-muted);
+    transition: color .15s ease, border-color .15s ease;
+    flex-shrink: 0;
   }
 
-  .copy-btn:hover {
-    color: var(--black);
-    border-color: var(--black);
-  }
-
+  .copy-btn:hover,
   .copy-btn.copied {
-    color: var(--black);
-    border-color: var(--black);
+    color: var(--accent);
+    border-color: var(--accent);
   }
 
   .hero-actions {
     display: flex;
-    justify-content: center;
-    gap: 1rem;
+    gap: .75rem;
     flex-wrap: wrap;
   }
 
+  .hero-chips {
+    margin: 0;
+  }
+
   .hero-license {
-    margin-top: 1.5rem;
     margin-bottom: 0;
-    font-size: 0.875rem;
-    color: var(--gray-500);
-  }
-
-  .hero-license a {
-    color: var(--gray-500);
-    text-decoration: none;
-    border-bottom: 1px solid var(--gray-300);
-    transition: all 0.15s ease;
-  }
-
-  .hero-license a:hover {
-    color: var(--black);
-    border-color: var(--black);
-  }
-
-  @media (max-width: 768px) {
-    .hero {
-      padding: 4rem 0;
-    }
-
-    .hero-title {
-      font-size: 2.5rem;
-    }
-
-    .hero-subtitle {
-      font-size: 1.125rem;
-    }
-
-    .hero-install {
-      width: 100%;
-      justify-content: center;
-    }
-
-    .hero-actions {
-      flex-direction: column;
-    }
-
-    .hero-actions .btn {
-      width: 100%;
-    }
+    font-size: .75rem;
   }
 </style>
 

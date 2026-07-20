@@ -57,8 +57,22 @@ const structuredData = {
     <link rel="canonical" href={siteUrl} />
 
     <!-- Performance & Security -->
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0a" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Theme init (before first paint, no flash) -->
+    <script is:inline>
+      (() => {
+        const saved = localStorage.getItem('theme');
+        const theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preload" href="/fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -93,6 +107,7 @@ const structuredData = {
     <title>{title}</title>
   </head>
   <body>
+    <a href="#content" class="skip-link">Skip to content</a>
     <slot />
   </body>
 </html>

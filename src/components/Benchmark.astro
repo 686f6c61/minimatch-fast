@@ -18,9 +18,10 @@ const securityComparison = [
 ];
 ---
 
-<section class="benchmarks" id="benchmarks">
+<section class="fade-in" id="benchmarks">
   <div class="container">
     <div class="section-header">
+      <span class="cmd">benchmark</span>
       <h2>Performance Benchmarks</h2>
       <p>Real measurements comparing minimatch-fast vs minimatch v10.x</p>
     </div>
@@ -39,14 +40,14 @@ const securityComparison = [
             <tr>
               <td><code>{row.pattern}</code></td>
               <td>{row.minimatch}</td>
-              <td class={row.highlight ? 'highlight' : ''}><strong>{row.fast}</strong></td>
+              <td class="fast-cell"><span class={row.highlight ? 'badge' : ''}>{row.fast}</span></td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
 
-    <h3 class="mt-4 mb-2">Security Comparison</h3>
+    <h3 class="security-heading">Security Comparison</h3>
 
     <div class="table-wrapper">
       <table>
@@ -62,7 +63,7 @@ const securityComparison = [
             <tr>
               <td>{row.feature}</td>
               <td class={row.danger ? 'danger' : ''}>{row.minimatch}</td>
-              <td class="success"><strong>{row.fast}</strong></td>
+              <td class="fast-cell"><span class="badge">{row.fast}</span></td>
             </tr>
           ))}
         </tbody>
@@ -77,38 +78,20 @@ const securityComparison = [
 </section>
 
 <style>
-  .benchmarks {
-    padding: 5rem 0;
-    background-color: var(--gray-50);
-  }
-
-  .table-wrapper {
-    overflow-x: auto;
-    margin-bottom: 2rem;
-  }
-
-  table {
-    min-width: 600px;
-  }
-
-  .highlight {
-    background-color: var(--gray-100);
+  .security-heading {
+    margin-top: var(--space-md);
+    font-size: .95rem;
   }
 
   .danger {
-    color: var(--gray-600);
+    color: var(--text-muted);
     text-decoration: line-through;
   }
 
-  .success {
-    background-color: var(--gray-100);
-  }
-
   .benchmark-note {
-    font-size: 0.875rem;
-    color: var(--gray-500);
-    text-align: center;
-    margin-top: 1.5rem;
+    font-size: .72rem;
+    color: var(--text-muted);
+    margin-top: 1rem;
     margin-bottom: 0;
   }
 </style>

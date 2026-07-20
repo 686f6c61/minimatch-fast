@@ -1,6 +1,0 @@
-# robots.txt for minimatch-fast
-User-agent: *
-Allow: /
-
-# Sitemap
-Sitemap: https://minimatch-fast.686f6c61.dev/sitemap.xml

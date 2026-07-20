@@ -42,14 +42,15 @@ const callbackOptions = [
 ];
 ---
 
-<section class="options" id="options">
-  <div class="container">
+<section class="fade-in" id="options">
+  <div class="container-wide">
     <div class="section-header">
+      <span class="cmd">options</span>
       <h2>Options</h2>
       <p>Configuration options for fine-tuning pattern matching</p>
     </div>
 
-    <h3>Core options (minimatch compatible)</h3>
+    <h3>Core options <span class="chip">minimatch compatible</span></h3>
     <div class="table-wrapper">
       <table>
         <thead>
@@ -73,8 +74,7 @@ const callbackOptions = [
       </table>
     </div>
 
-    <h3>Extended options (v0.3.0+)</h3>
-    <p class="new-badge">New in v0.3.0 - picomatch options</p>
+    <h3>Extended options <span class="badge">new in v0.3.0</span></h3>
     <div class="table-wrapper">
       <table>
         <thead>
@@ -98,7 +98,7 @@ const callbackOptions = [
       </table>
     </div>
 
-    <h3>Callback options (v0.3.0+)</h3>
+    <h3>Callback options <span class="badge">new in v0.3.0</span></h3>
     <div class="table-wrapper">
       <table>
         <thead>
@@ -124,7 +124,7 @@ const callbackOptions = [
 
     <h3>Examples</h3>
     <div class="examples-grid">
-      <div class="example-card">
+      <div class="card example-card">
         <h4>ignore</h4>
         <pre><code>const mm = new Minimatch('**/*.js', {'{'}
   ignore: ['**/*.test.js', '**/node_modules/**']
@@ -133,21 +133,21 @@ mm.match('src/app.js');      // true
 mm.match('src/app.test.js'); // false</code></pre>
       </div>
 
-      <div class="example-card">
+      <div class="card example-card">
         <h4>failglob</h4>
         <pre><code>// Throw if no matches found
 minimatch.match(files, '*.ts', {'{'} failglob: true {'}'});
 // Error: No matches found for pattern: *.ts</code></pre>
       </div>
 
-      <div class="example-card">
+      <div class="card example-card">
         <h4>contains</h4>
         <pre><code>// Match anywhere in string
 minimatch('foobar', 'bar', {'{'} contains: true {'}'});
 // true (matches substring)</code></pre>
       </div>
 
-      <div class="example-card">
+      <div class="card example-card">
         <h4>format</h4>
         <pre><code>// Transform paths before matching
 const mm = new Minimatch('src/*.js', {'{'}
@@ -156,7 +156,7 @@ const mm = new Minimatch('src/*.js', {'{'}
 mm.match('./src/app.js'); // true</code></pre>
       </div>
 
-      <div class="example-card">
+      <div class="card example-card">
         <h4>callbacks</h4>
         <pre><code>const mm = new Minimatch('*.js', {'{'}
   onMatch: (r) => console.log('Match:', r.output),
@@ -164,7 +164,7 @@ mm.match('./src/app.js'); // true</code></pre>
 {'}'});</code></pre>
       </div>
 
-      <div class="example-card">
+      <div class="card example-card">
         <h4>literalBrackets</h4>
         <pre><code>// Match literal brackets in filenames
 const mm = new Minimatch('[file].js', {'{'}
@@ -177,80 +177,51 @@ mm.match('[file].js'); // true</code></pre>
 </section>
 
 <style>
-  .options {
-    padding: 5rem 0;
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+    margin-top: var(--space-md);
+    margin-bottom: .75rem;
+    font-size: .95rem;
   }
 
-  .options h3 {
-    margin-top: 2rem;
-    margin-bottom: 0.5rem;
-    font-size: 1.25rem;
-  }
+  section .section-header + h3 { margin-top: 0; }
 
-  .new-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-  }
+  .table-wrapper { margin-bottom: 1.5rem; }
+  .table-wrapper table { min-width: 860px; }
 
-  .table-wrapper {
-    overflow-x: auto;
-    margin-bottom: 2rem;
-  }
+  .type-cell, .default-cell { white-space: nowrap; }
 
-  table {
-    min-width: 900px;
-  }
-
-  .type-cell,
-  .default-cell {
-    white-space: nowrap;
-  }
-
-  .type-cell code,
-  .default-cell code {
-    font-size: 0.75rem;
-  }
+  .type-cell code, .default-cell code { font-size: .68rem; }
 
   .desc-cell {
-    font-size: 0.875rem;
-    color: var(--gray-600);
+    font-size: .75rem;
+    color: var(--text-muted);
   }
 
   .examples-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1rem;
   }
 
-  .example-card {
-    background: var(--gray-50);
-    border: 1px solid var(--gray-200);
-    border-radius: 8px;
-    padding: 1.25rem;
-  }
+  .example-card { padding: 1.25rem; }
 
   .example-card h4 {
     font-family: var(--font-mono);
-    font-size: 0.875rem;
-    margin: 0 0 0.75rem 0;
-    color: var(--primary);
+    font-size: .78rem;
+    margin-bottom: .75rem;
+    color: var(--accent);
   }
 
   .example-card pre {
     margin: 0;
-    font-size: 0.75rem;
-    line-height: 1.5;
-    overflow-x: auto;
-  }
-
-  .example-card code {
-    font-family: var(--font-mono);
+    font-size: .7rem;
+    border: none;
+    padding: 0;
+    background: transparent;
   }
 </style>

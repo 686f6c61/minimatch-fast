@@ -32,17 +32,27 @@ const files: string[] = minimatch.match(['a.js', 'b.ts'], '*.js');
 
 // Brace expansion
 const expanded: string[] = minimatch.braceExpand('{a,b,c}');`;
+
+const exportedTypes = [
+  { name: 'minimatch', desc: 'The main function' },
+  { name: 'Minimatch', desc: 'The Minimatch class' },
+  { name: 'MinimatchOptions', desc: 'Configuration options interface' },
+  { name: 'MMRegExp', desc: 'Extended RegExp with index info' },
+  { name: 'ParseReturn', desc: 'Type for parsed pattern segments' },
+  { name: 'AST', desc: 'Type for the abstract syntax tree' },
+];
 ---
 
-<section class="typescript" id="typescript">
+<section class="fade-in" id="typescript">
   <div class="container">
     <div class="section-header">
+      <span class="cmd">typescript</span>
       <h2>TypeScript Support</h2>
       <p>Full type definitions included</p>
     </div>
 
     <div class="ts-content">
-      <p>
+      <p class="ts-intro">
         minimatch-fast ships with complete TypeScript definitions. All types are exported
         and ready to use without installing separate <code>@types</code> packages.
       </p>
@@ -50,52 +60,33 @@ const expanded: string[] = minimatch.braceExpand('{a,b,c}');`;
       <CodeBlock lang="typescript" code={tsExample} />
 
       <h3>Exported Types</h3>
-      <ul class="type-list">
-        <li><code>minimatch</code> - The main function</li>
-        <li><code>Minimatch</code> - The Minimatch class</li>
-        <li><code>MinimatchOptions</code> - Configuration options interface</li>
-        <li><code>MMRegExp</code> - Extended RegExp with index info</li>
-        <li><code>ParseReturn</code> - Type for parsed pattern segments</li>
-        <li><code>AST</code> - Type for the abstract syntax tree</li>
+      <ul class="type-list list-minimal">
+        {exportedTypes.map(t => (
+          <li><code>{t.name}</code> <span class="type-desc">- {t.desc}</span></li>
+        ))}
       </ul>
     </div>
   </div>
 </section>
 
 <style>
-  .typescript {
-    padding: 5rem 0;
-  }
-
-  .ts-content {
-    max-width: 800px;
-  }
-
-  .ts-content > p {
-    color: var(--gray-600);
-    margin-bottom: 2rem;
+  .ts-intro {
+    color: var(--text-muted);
+    font-size: .85rem;
+    margin-bottom: 1.5rem;
   }
 
   .ts-content h3 {
-    font-size: 1.125rem;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-  }
-
-  .type-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 0.5rem;
-    padding: 0;
-    list-style: none;
+    font-size: .95rem;
+    margin-top: 1.5rem;
+    margin-bottom: .5rem;
   }
 
   .type-list li {
-    padding: 0.5rem 0;
-    color: var(--gray-600);
+    font-size: .8rem;
   }
 
-  .type-list code {
-    margin-right: 0.5rem;
-  }
+  .type-list code { margin-right: .5rem; }
+
+  .type-desc { color: var(--text-muted); }
 </style>

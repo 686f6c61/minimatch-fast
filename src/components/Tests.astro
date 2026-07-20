@@ -1,5 +1,4 @@
 ---
-import Check from './icons/Check.astro';
 import CodeBlock from './CodeBlock.astro';
 
 const testCategories = [
@@ -21,30 +20,26 @@ npm run test:coverage
 npm run test:compat`;
 ---
 
-<section class="tests" id="tests">
+<section class="fade-in" id="tests">
   <div class="container">
     <div class="section-header">
+      <span class="cmd">tests</span>
       <h2>Testing & Compatibility</h2>
       <p>Comprehensive test suite ensures reliability</p>
     </div>
 
     <div class="test-grid">
       {testCategories.map(cat => (
-        <div class="test-card">
-          <div class="test-icon">
-            <Check size={24} />
-          </div>
-          <div class="test-info">
-            <div class="test-count">{cat.count}</div>
-            <div class="test-name">{cat.name}</div>
-            <div class="test-desc">{cat.description}</div>
-          </div>
+        <div class="card test-card">
+          <div class="test-count">{cat.count}</div>
+          <div class="test-name">{cat.name}</div>
+          <div class="test-desc">{cat.description}</div>
         </div>
       ))}
     </div>
 
-    <div class="test-details">
-      <h3>402 Tests Total</h3>
+    <div class="card test-details">
+      <h3><span class="badge">402 tests total</span></h3>
       <p>
         Every release is verified against the original minimatch test suite plus
         additional tests for edge cases, Windows paths, and security vulnerabilities.
@@ -57,13 +52,13 @@ npm run test:compat`;
       <p>
         Found a compatibility issue? Please open an issue on GitHub with:
       </p>
-      <ul>
+      <ul class="list-minimal">
         <li>The pattern and path that produces different results</li>
         <li>Expected behavior (what minimatch returns)</li>
         <li>Actual behavior (what minimatch-fast returns)</li>
         <li>Any relevant options used</li>
       </ul>
-      <p>
+      <p class="issue-link">
         <a href="https://github.com/686f6c61/minimatch-fast/issues" target="_blank" rel="noopener noreferrer">
           Open an issue on GitHub
         </a>
@@ -73,86 +68,56 @@ npm run test:compat`;
 </section>
 
 <style>
-  .tests {
-    padding: 5rem 0;
-    background-color: var(--gray-50);
-  }
-
   .test-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
   }
 
-  .test-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    padding: 1.5rem;
-    background-color: var(--white);
-    border: 1px solid var(--black);
-    border-radius: 8px;
-  }
-
-  .test-icon {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background-color: var(--gray-100);
-    border: 1px solid var(--gray-300);
-    border-radius: 8px;
-  }
+  .test-card { padding: 1.25rem; }
 
   .test-count {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
     line-height: 1;
-    margin-bottom: 0.25rem;
+    margin-bottom: .4rem;
+    color: var(--accent);
   }
 
   .test-name {
     font-weight: 600;
-    margin-bottom: 0.25rem;
+    font-size: .8rem;
+    margin-bottom: .25rem;
   }
 
   .test-desc {
-    font-size: 0.875rem;
-    color: var(--gray-600);
-  }
-
-  .test-details {
-    background-color: var(--white);
-    border: 1px solid var(--black);
-    border-radius: 8px;
-    padding: 2rem;
+    font-size: .72rem;
+    color: var(--text-muted);
   }
 
   .test-details h3 {
-    font-size: 1.125rem;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
+    font-size: .95rem;
+    margin-top: 1.5rem;
+    margin-bottom: .75rem;
   }
 
-  .test-details h3:first-child {
-    margin-top: 0;
-  }
+  .test-details h3:first-child { margin-top: 0; }
 
   .test-details p {
-    color: var(--gray-600);
+    color: var(--text-muted);
+    font-size: .8rem;
     line-height: 1.6;
   }
 
-  .test-details ul {
-    margin: 1rem 0;
-    padding-left: 1.5rem;
-    color: var(--gray-600);
+  .test-details .list-minimal {
+    margin: .75rem 0 1rem;
   }
 
-  .test-details li {
-    margin-bottom: 0.5rem;
+  .test-details .list-minimal li {
+    color: var(--text-muted);
+    font-size: .8rem;
   }
+
+  .issue-link { margin-bottom: 0; }
 </style>

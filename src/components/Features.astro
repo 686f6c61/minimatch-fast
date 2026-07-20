@@ -25,7 +25,7 @@ const features = [
   {
     icon: Check,
     title: '100% Compatible',
-    description: 'Drop-in replacement with identical API. 355 tests ensure full compatibility with minimatch v10.x behavior.'
+    description: 'Drop-in replacement with identical API. 402 tests ensure full compatibility with minimatch v10.x behavior.'
   },
   {
     icon: TypeScriptIcon,
@@ -40,9 +40,10 @@ const features = [
 ];
 ---
 
-<section class="features" id="features">
+<section class="fade-in" id="features">
   <div class="container">
     <div class="section-header">
+      <span class="cmd">features</span>
       <h2>Why minimatch-fast?</h2>
       <p>The performance and security upgrade your glob matching needs</p>
     </div>
@@ -51,7 +52,7 @@ const features = [
       {features.map(feature => (
         <div class="card feature-card">
           <div class="feature-icon">
-            <feature.icon size={32} />
+            <feature.icon size={20} />
           </div>
           <h3 class="feature-title">{feature.title}</h3>
           <p class="feature-description">{feature.description}</p>
@@ -62,34 +63,27 @@ const features = [
 </section>
 
 <style>
-  .features {
-    padding: 5rem 0;
-  }
-
-  .feature-card {
-    text-align: center;
-    padding: 2rem;
-  }
-
   .feature-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 64px;
-    height: 64px;
-    margin-bottom: 1.5rem;
-    background-color: var(--gray-100);
-    border: 1px solid var(--black);
-    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 1rem;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
   }
 
   .feature-title {
-    font-size: 1.25rem;
-    margin-bottom: 0.75rem;
+    font-size: .95rem;
+    margin-bottom: .5rem;
   }
 
   .feature-description {
-    color: var(--gray-600);
+    color: var(--text-muted);
+    font-size: .8rem;
     margin-bottom: 0;
     line-height: 1.6;
   }

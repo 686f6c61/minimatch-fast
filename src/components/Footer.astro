@@ -20,7 +20,7 @@ const credits = [
   <div class="container">
     <div class="footer-content">
       <div class="footer-brand">
-        <span class="footer-logo">minimatch-fast</span>
+        <span class="cmd">minimatch-fast</span>
         <p class="footer-tagline">
           Drop-in replacement for minimatch.<br />
           6-25x faster. Zero vulnerabilities.
@@ -29,11 +29,11 @@ const credits = [
 
       <div class="footer-links">
         <h4>Links</h4>
-        <ul>
+        <ul class="list-minimal">
           {links.map(link => (
             <li>
               <a href={link.href} target="_blank" rel="noopener noreferrer">
-                {link.icon && <link.icon size={16} />}
+                {link.icon && <link.icon size={14} />}
                 {link.label}
               </a>
             </li>
@@ -43,13 +43,13 @@ const credits = [
 
       <div class="footer-credits">
         <h4>Credits</h4>
-        <ul>
+        <ul class="list-minimal">
           {credits.map(credit => (
             <li>
               <a href={credit.url} target="_blank" rel="noopener noreferrer">
                 {credit.name}
               </a>
-              <span>({credit.project})</span>
+              <span class="credit-project">({credit.project})</span>
             </li>
           ))}
         </ul>
@@ -66,94 +66,62 @@ const credits = [
 
 <style>
   .footer {
-    padding: 4rem 0 2rem;
-    background-color: var(--black);
-    color: var(--white);
+    padding: var(--space-lg) 0 var(--space-md);
   }
 
   .footer-content {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
-    gap: 3rem;
-    margin-bottom: 3rem;
-  }
-
-  .footer-logo {
-    font-family: var(--font-mono);
-    font-size: 1.25rem;
-    font-weight: 700;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
   }
 
   .footer-tagline {
-    margin-top: 1rem;
-    color: var(--gray-400);
-    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-size: .78rem;
     line-height: 1.6;
+    margin-bottom: 0;
   }
 
   .footer h4 {
-    font-size: 0.75rem;
+    font-size: .68rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--gray-400);
-    margin-bottom: 1rem;
+    letter-spacing: .05em;
+    color: var(--text-muted);
+    margin-bottom: .5rem;
   }
 
-  .footer ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .footer li {
-    margin-bottom: 0.75rem;
-  }
+  .footer li { padding: .35rem 0; }
 
   .footer a {
-    color: var(--white);
-    text-decoration: none;
-    font-size: 0.875rem;
+    font-size: .78rem;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: color 0.15s ease;
+    gap: .4rem;
   }
 
-  .footer a:hover {
-    color: var(--gray-300);
-  }
-
-  .footer-credits li span {
-    color: var(--gray-500);
-    font-size: 0.75rem;
-    margin-left: 0.25rem;
+  .credit-project {
+    color: var(--text-muted);
+    font-size: .68rem;
+    margin-left: .25rem;
   }
 
   .footer-bottom {
-    padding-top: 2rem;
-    border-top: 1px solid var(--gray-800);
-    text-align: center;
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--border);
   }
 
   .footer-bottom p {
-    color: var(--gray-500);
-    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-size: .72rem;
     margin: 0;
-  }
-
-  .footer-bottom a {
-    color: var(--gray-400);
   }
 
   @media (max-width: 768px) {
     .footer-content {
       grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-
-    .footer-brand {
-      text-align: center;
+      gap: var(--space-sm);
     }
   }
 </style>

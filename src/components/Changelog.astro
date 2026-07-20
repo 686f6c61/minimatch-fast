@@ -132,17 +132,18 @@ const versions = [
 ];
 
 const typeLabels: Record<string, string> = {
-  added: 'Added',
-  changed: 'Changed',
-  security: 'Security',
-  fixed: 'Fixed',
-  removed: 'Removed',
+  added: 'added',
+  changed: 'changed',
+  security: 'security',
+  fixed: 'fixed',
+  removed: 'removed',
 };
 ---
 
-<section class="changelog" id="changelog">
+<section class="fade-in" id="changelog">
   <div class="container">
     <div class="section-header">
+      <span class="cmd">changelog</span>
       <h2>Changelog</h2>
       <p>Project evolution and version history</p>
     </div>
@@ -159,7 +160,7 @@ const typeLabels: Record<string, string> = {
             <div class="version-header">
               <div class="version-info">
                 <span class="version-number">v{v.version}</span>
-                {v.tag && <span class="version-tag">{v.tag}</span>}
+                {v.tag && <span class="badge">{v.tag}</span>}
               </div>
               <span class="version-date">{v.date}</span>
             </div>
@@ -170,17 +171,17 @@ const typeLabels: Record<string, string> = {
               </div>
             )}
 
-            <div class="version-highlights">
+            <ul class="chips version-highlights">
               {v.highlights.map(h => (
-                <span class="highlight-badge">{h}</span>
+                <li class="chip">{h}</li>
               ))}
-            </div>
+            </ul>
 
-            <ul class="version-changes">
+            <ul class="version-changes list-minimal">
               {v.changes.map(change => (
                 <li class={`change-${change.type}`}>
                   <span class="change-type">{typeLabels[change.type]}</span>
-                  {change.text}
+                  <span class="change-text">{change.text}</span>
                 </li>
               ))}
             </ul>
@@ -192,18 +193,9 @@ const typeLabels: Record<string, string> = {
 </section>
 
 <style>
-  .changelog {
-    padding: 5rem 0;
-  }
-
-  .timeline {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
   .timeline-item {
     display: flex;
-    gap: 1.5rem;
+    gap: 1.25rem;
   }
 
   .timeline-marker {
@@ -214,155 +206,96 @@ const typeLabels: Record<string, string> = {
   }
 
   .timeline-dot {
-    width: 16px;
-    height: 16px;
-    background-color: var(--black);
+    width: 10px;
+    height: 10px;
+    margin-top: .45rem;
+    background: var(--accent);
     border-radius: 50%;
-    border: 3px solid var(--white);
-    box-shadow: 0 0 0 2px var(--black);
   }
 
   .timeline-line {
-    width: 2px;
+    width: 1px;
     flex: 1;
-    background-color: var(--gray-300);
-    margin-top: 0.5rem;
+    background: var(--border);
+    margin-top: .5rem;
   }
 
   .timeline-content {
     flex: 1;
-    padding-bottom: 3rem;
+    padding-bottom: var(--space-lg);
   }
 
-  .timeline-item:last-child .timeline-content {
-    padding-bottom: 0;
-  }
+  .timeline-item:last-child .timeline-content { padding-bottom: 0; }
 
   .version-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: .5rem;
+    margin-bottom: .75rem;
   }
 
   .version-info {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: .6rem;
   }
 
   .version-number {
     font-family: var(--font-mono);
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 700;
   }
 
-  .version-tag {
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    background-color: var(--black);
-    color: var(--white);
-    border-radius: 9999px;
-  }
-
   .version-date {
-    font-size: 0.875rem;
-    color: var(--gray-500);
+    font-size: .72rem;
+    color: var(--text-muted);
     font-family: var(--font-mono);
   }
 
   .version-performance {
-    margin-bottom: 1rem;
-    padding: 0.5rem 1rem;
-    background-color: var(--gray-100);
-    border: 1px solid var(--black);
-    border-radius: 6px;
     display: inline-block;
-    font-size: 0.875rem;
+    margin-bottom: .75rem;
+    padding: .2rem .6rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: .72rem;
+    color: var(--accent);
   }
 
-  .version-highlights {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .highlight-badge {
-    padding: 0.25rem 0.625rem;
-    font-size: 0.75rem;
-    background-color: var(--gray-100);
-    border: 1px solid var(--gray-300);
-    border-radius: 4px;
-  }
-
-  .version-changes {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
+  .version-highlights { margin-bottom: .75rem; }
 
   .version-changes li {
-    padding: 0.5rem 0;
-    font-size: 0.875rem;
-    color: var(--gray-600);
-    border-bottom: 1px solid var(--gray-100);
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
-  }
-
-  .version-changes li:last-child {
-    border-bottom: none;
+    gap: .6rem;
+    font-size: .75rem;
+    color: var(--text-muted);
   }
 
   .change-type {
     flex-shrink: 0;
-    padding: 0.125rem 0.5rem;
-    font-size: 0.625rem;
+    padding: 0 .4em;
+    font-size: .6rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-radius: 4px;
-    background-color: var(--gray-200);
-    color: var(--gray-700);
+    letter-spacing: .05em;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    line-height: 1.9;
   }
 
-  .change-added .change-type {
-    background-color: var(--gray-800);
-    color: var(--white);
-  }
-
+  .change-added .change-type,
   .change-security .change-type {
-    background-color: var(--black);
-    color: var(--white);
-  }
-
-  .change-changed .change-type {
-    background-color: var(--gray-300);
-    color: var(--black);
-  }
-
-  .change-removed .change-type {
-    background-color: var(--gray-500);
-    color: var(--white);
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--bg);
   }
 
   @media (max-width: 768px) {
-    .timeline-item {
-      gap: 1rem;
-    }
-
-    .version-number {
-      font-size: 1.25rem;
-    }
-
-    .version-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
+    .timeline-item { gap: .75rem; }
   }
 </style>

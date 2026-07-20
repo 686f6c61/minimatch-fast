@@ -13,6 +13,12 @@ export default defineConfig({
   ],
   site: 'https://minimatch-fast.686f6c61.dev',
   build: {
-    assets: '_assets'
+    assets: '_assets',
+    sourcemap: false
+  },
+  vite: {
+    build: {
+      sourcemap: false
+    }
   }
 });

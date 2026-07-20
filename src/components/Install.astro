@@ -2,16 +2,17 @@
 import CodeBlock from './CodeBlock.astro';
 ---
 
-<section class="install" id="install">
+<section class="fade-in" id="install">
   <div class="container">
     <div class="section-header">
+      <span class="cmd">install</span>
       <h2>Installation</h2>
       <p>Two ways to upgrade from minimatch</p>
     </div>
 
     <div class="install-grid">
-      <div class="install-option">
-        <h3>Option 1: Update imports</h3>
+      <div class="card install-option">
+        <h3><span class="badge">option 1</span> Update imports</h3>
         <p>Install the package and update your import statements:</p>
 
         <CodeBlock
@@ -34,8 +35,8 @@ npm install minimatch-fast`}
         </div>
       </div>
 
-      <div class="install-option">
-        <h3>Option 2: npm aliasing</h3>
+      <div class="card install-option">
+        <h3><span class="badge">option 2</span> npm aliasing</h3>
         <p>Zero code changes required. Use npm's package aliasing:</p>
 
         <CodeBlock
@@ -55,61 +56,66 @@ npm install minimatch-fast`}
 </section>
 
 <style>
-  .install {
-    padding: 5rem 0;
-  }
-
   .install-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.25rem;
   }
 
   .install-option h3 {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-size: .95rem;
     margin-bottom: 1rem;
+  }
+
+  .install-option p {
+    font-size: .8rem;
+    color: var(--text-muted);
   }
 
   .diff-block {
     margin-bottom: 1rem;
-    border: 1px solid var(--black);
-    border-radius: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     overflow: hidden;
   }
 
   .diff-block pre {
     margin: 0;
-    padding: 1rem;
     border: none;
     border-radius: 0;
   }
 
   .diff-remove {
     display: block;
-    background-color: #fee;
-    color: #900;
-    margin: -0.25rem -1rem;
-    padding: 0.25rem 1rem;
+    background: #fee2;
+    color: #c0392b;
+    margin: -.1rem -1rem;
+    padding: .1rem 1rem;
   }
 
   .diff-add {
     display: block;
-    background-color: #efe;
-    color: #090;
-    margin: -0.25rem -1rem;
-    padding: 0.25rem 1rem;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    margin: -.1rem -1rem;
+    padding: .1rem 1rem;
   }
 
   .alias-note {
-    padding: 1rem;
-    background-color: var(--gray-100);
-    border: 1px solid var(--gray-300);
-    border-radius: 8px;
-    font-size: 0.875rem;
+    padding: .8rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: .75rem;
+    color: var(--text-muted);
   }
 
+  .alias-note strong { color: var(--text); }
+
   @media (max-width: 768px) {
-    .install-grid {
-      grid-template-columns: 1fr;
-    }
+    .install-grid { grid-template-columns: 1fr; }
   }
 </style>

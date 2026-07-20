@@ -68,9 +68,10 @@ minimatch.unescape('\\\\[foo\\\\].js');
 // => '[foo].js'`;
 ---
 
-<section class="usage" id="usage">
-  <div class="container">
+<section class="fade-in" id="usage">
+  <div class="container-wide">
     <div class="section-header">
+      <span class="cmd">usage</span>
       <h2>Usage Examples</h2>
       <p>Common patterns and use cases</p>
     </div>
@@ -110,25 +111,19 @@ minimatch.unescape('\\\\[foo\\\\].js');
 </section>
 
 <style>
-  .usage {
-    padding: 5rem 0;
-    background-color: var(--gray-50);
-  }
-
   .examples-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 1.5rem;
   }
 
   .example h3 {
-    font-size: 1.125rem;
-    margin-bottom: 1rem;
+    font-size: .9rem;
+    color: var(--text-muted);
+    margin-bottom: .75rem;
   }
 
   @media (max-width: 768px) {
-    .examples-grid {
-      grid-template-columns: 1fr;
-    }
+    .examples-grid { grid-template-columns: 1fr; }
   }
 </style>

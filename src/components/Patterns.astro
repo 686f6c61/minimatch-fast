@@ -33,9 +33,10 @@ const unicodeExamples = [
 ];
 ---
 
-<section class="patterns" id="patterns">
-  <div class="container">
+<section class="fade-in" id="patterns">
+  <div class="container-wide">
     <div class="section-header">
+      <span class="cmd">patterns</span>
       <h2>Glob Pattern Reference</h2>
       <p>Complete guide to glob pattern syntax</p>
     </div>
@@ -63,7 +64,7 @@ const unicodeExamples = [
 
     <div class="subsection">
       <h3>POSIX Character Classes</h3>
-      <p>Full support for POSIX bracket expressions</p>
+      <p class="subsection-desc">Full support for POSIX bracket expressions</p>
       <div class="table-wrapper">
         <table>
           <thead>
@@ -88,7 +89,7 @@ const unicodeExamples = [
 
     <div class="subsection">
       <h3>Unicode Support</h3>
-      <p>Full Unicode and emoji support in patterns and filenames</p>
+      <p class="subsection-desc">Full Unicode and emoji support in patterns and filenames</p>
       <div class="table-wrapper">
         <table>
           <thead>
@@ -114,37 +115,20 @@ const unicodeExamples = [
 </section>
 
 <style>
-  .patterns {
-    padding: 5rem 0;
-  }
-
-  .table-wrapper {
-    overflow-x: auto;
-  }
-
-  table {
-    min-width: 800px;
-  }
-
-  .example-cell {
-    font-size: 0.8125rem;
-  }
+  .table-wrapper table { min-width: 720px; }
 
   .example-cell code {
+    font-size: .72rem;
     white-space: nowrap;
   }
 
-  .subsection {
-    margin-top: 3rem;
-  }
+  .subsection { margin-top: var(--space-md); }
 
-  .subsection h3 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-  }
+  .subsection h3 { font-size: .95rem; margin-bottom: .25rem; }
 
-  .subsection > p {
-    color: var(--gray-600);
+  .subsection-desc {
+    color: var(--text-muted);
+    font-size: .78rem;
     margin-bottom: 1rem;
   }
 </style>
