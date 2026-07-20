@@ -1,17 +1,17 @@
 ---
 const warmRows = [
-  { scenario: 'Warm function API, {src,lib}/**/*.{js,ts,tsx}', fast: '17x faster', highlight: true },
-  { scenario: 'Warm function API, @(foo|bar|baz).js', fast: '7x faster', highlight: true },
-  { scenario: 'Warm function API, *.js / **/*.js', fast: '2.6-2.8x faster', highlight: true },
+  { scenario: 'Warm function API, {src,lib}/**/*.{js,ts,tsx}', fast: '29x faster', highlight: true },
+  { scenario: 'Warm function API, @(foo|bar|baz).js', fast: '8.7x faster', highlight: true },
+  { scenario: 'Warm function API, *.js / **/*.js', fast: '3-3.3x faster', highlight: true },
 ];
 
 const engineRows = [
-  { scenario: 'Pre-compiled engine, file[0-9].js', fast: '2.3x faster', highlight: true },
-  { scenario: 'Pre-compiled engine, **/*.js', fast: '1.3x faster', highlight: true },
-  { scenario: 'Pre-compiled engine, @(foo|bar|baz).js', fast: '1.25x faster', highlight: false },
-  { scenario: 'Pre-compiled engine, *.js / !*.test.js / ???.js', fast: '~1x (parity)', highlight: false },
-  { scenario: 'Pre-compiled engine, brace-heavy patterns', fast: '0.3-0.4x (slower)', highlight: false },
-  { scenario: 'Cold single calls (every call compiles)', fast: '~1x (parity)', highlight: false },
+  { scenario: 'Pre-compiled engine, file[0-9].js', fast: '6.2x faster', highlight: true },
+  { scenario: 'Pre-compiled engine, @(foo|bar|baz).js', fast: '3.6x faster', highlight: true },
+  { scenario: 'Pre-compiled engine, {src,lib}/**/*.{js,ts,tsx}', fast: '3.4x faster', highlight: true },
+  { scenario: 'Pre-compiled engine, *.js / **/*.js', fast: '2.6x faster', highlight: true },
+  { scenario: 'Pre-compiled engine, {src,lib}/*.js (2-way brace)', fast: '0.65x (slower)', highlight: false },
+  { scenario: 'Cold single calls (every call compiles)', fast: 'parity to 2.3x', highlight: false },
 ];
 
 const securityComparison = [
@@ -57,9 +57,10 @@ const securityComparison = [
 
     <h3 class="table-heading">Engine vs engine (no cache)</h3>
     <p class="table-note">
-      Pre-compiled instances on both sides. picomatch wins on globstar and character
-      classes, ties on simple patterns, and is currently slower on brace-heavy
-      patterns (one matcher per brace expansion — single-matcher compilation is on the roadmap).
+      Pre-compiled instances on both sides. Brace patterns compile natively into a
+      single regex and multiple expansions share one matcher, winning 2-6x on most
+      shapes. The one remaining slower case is the simple 2-way brace, where
+      minimatch's regex is unusually efficient (~150ns per call in absolute terms).
     </p>
     <div class="table-wrapper">
       <table>
