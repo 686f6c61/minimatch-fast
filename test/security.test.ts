@@ -218,7 +218,9 @@ describe('hasMagic', () => {
   });
 
   it('should respect magicalBraces option', () => {
-    expect(new Minimatch('{a,b}.js').hasMagic()).toBe(true); // Multiple patterns from brace expansion
+    // Without magicalBraces, brace expansion produces literal patterns,
+    // so there is no magic (matches original minimatch behavior)
+    expect(new Minimatch('{a,b}.js').hasMagic()).toBe(false);
     expect(
       new Minimatch('{a,b}.js', { magicalBraces: true }).hasMagic()
     ).toBe(true);

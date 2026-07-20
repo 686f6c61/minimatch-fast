@@ -53,7 +53,7 @@ import {
 /**
  * Default maximum pattern length to prevent ReDoS attacks
  */
-const DEFAULT_MAX_PATTERN_LENGTH = 65536;
+export const DEFAULT_MAX_PATTERN_LENGTH = 65536;
 
 /**
  * Minimatch class for glob pattern matching
@@ -118,7 +118,6 @@ export class Minimatch {
   // Cached computed values for performance
   private _hasNegatedCharClassCached: boolean;
   private _requiresTrailingSlashCached: boolean;
-  private _patternBasename: string;
 
   /**
    * Create a new Minimatch instance
@@ -198,12 +197,6 @@ export class Minimatch {
     // These are used in match() and would otherwise be computed on every call
     this._hasNegatedCharClassCached = /\[\^[^\]]+\]/.test(this.pattern);
     this._requiresTrailingSlashCached = /\*\*\/\.[^/]+\/\*\*/.test(this.pattern);
-
-    // Cache pattern basename for dotfile handling
-    const lastSlash = this.pattern.lastIndexOf('/');
-    this._patternBasename = lastSlash >= 0
-      ? this.pattern.slice(lastSlash + 1)
-      : this.pattern;
   }
 
   /**
@@ -382,6 +375,12 @@ export class Minimatch {
 
   /**
    * Parse a single pattern part into a regex or string
+   *
+   * Literal parts (no glob magic) are returned as plain strings, matching
+   * minimatch's behavior. This makes hasMagic() work correctly and avoids
+   * regex compilation for literal segments. With nocase, literals are
+   * compiled to regexes so that matching stays case-insensitive (this also
+   * matches minimatch, where hasMagic() returns true for nocase patterns).
    */
   private parse(pattern: string): ParseReturn {
     // Globstar
@@ -392,6 +391,13 @@ export class Minimatch {
     // Empty string
     if (pattern === '') {
       return '';
+    }
+
+    // Literal part without magic characters: keep as string.
+    // Magic means: unescaped *, ?, character classes [ ], backslash escapes,
+    // or extglob introducers like @( !( *( +(
+    if (!this.nocase && !/[*?\][\\]/.test(pattern) && !/[@!+*]\(/.test(pattern)) {
+      return pattern;
     }
 
     // Try to create a regex using picomatch
@@ -440,11 +446,15 @@ export class Minimatch {
     const lastSlashIdx = path.lastIndexOf('/');
     const basename = lastSlashIdx >= 0 ? path.slice(lastSlashIdx + 1) : path;
 
-    // minimatch compatibility: '.' and '..' never match unless pattern explicitly includes them
-    // This is true even with dot:true option
+    // minimatch compatibility: '.' and '..' are never matched by wildcards,
+    // even with dot:true. They only match when an expanded pattern
+    // explicitly ends with that literal segment.
     if (basename === '.' || basename === '..') {
-      // Only match if the pattern basename equals the path or pattern contains the special dir
-      if (this._patternBasename !== basename && !this.pattern.includes(basename)) {
+      const explicit = this.globSet.some((glob) => {
+        const idx = glob.lastIndexOf('/');
+        return (idx >= 0 ? glob.slice(idx + 1) : glob) === basename;
+      });
+      if (!explicit) {
         return this.negate ? true : false;
       }
     }
@@ -592,7 +602,14 @@ export class Minimatch {
           ? regexParts[0]
           : `(?:${regexParts.join('|')})`;
 
-      const re = `^${combined}$`;
+      let re = `^${combined}$`;
+
+      // Negated patterns match anything EXCEPT the pattern,
+      // mirroring minimatch's makeRe behavior
+      if (this.negate) {
+        re = `^(?!${re}).+$`;
+      }
+
       this.regexp = new RegExp(re, flags) as MMRegExp;
       this.regexp._src = re;
       this.regexp._glob = this.pattern;

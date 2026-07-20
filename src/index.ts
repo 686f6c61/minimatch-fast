@@ -50,7 +50,7 @@ import type {
   GlobstarSymbol,
 } from './types.js';
 import { GLOBSTAR } from './types.js';
-import { Minimatch } from './minimatch-class.js';
+import { Minimatch, DEFAULT_MAX_PATTERN_LENGTH } from './minimatch-class.js';
 import { braceExpand } from './brace-expand.js';
 import { escape } from './escape.js';
 import { unescape } from './unescape.js';
@@ -122,9 +122,39 @@ export function minimatch(
     return false;
   }
 
+  // Enforce maxLength here as well: fast paths below skip Minimatch
+  // construction, which is where this validation normally happens
+  const maxLength = options.maxLength ?? DEFAULT_MAX_PATTERN_LENGTH;
+  if (pattern.length > maxLength) {
+    throw new TypeError(
+      `Pattern length ${pattern.length} exceeds maximum ${maxLength}. ` +
+      `This limit exists to prevent ReDoS attacks. ` +
+      `Use options.maxLength to increase if needed.`
+    );
+  }
+
   // Try fast path for simple patterns (no path separators, no complex features)
-  // Fast paths avoid creating Minimatch instance entirely
-  if (!options.matchBase && mightUseFastPath(pattern)) {
+  // Fast paths avoid creating Minimatch instance entirely.
+  // They only implement a subset of minimatch semantics (dot, nocase), so any
+  // option they don't understand must fall through to the full engine.
+  const canFastPath =
+    !options.matchBase &&
+    !options.partial &&
+    !options.flags &&
+    !options.ignore &&
+    !options.format &&
+    !options.contains &&
+    !options.bash &&
+    !options.keepQuotes &&
+    !options.unescape &&
+    !options.strictBrackets &&
+    !options.literalBrackets &&
+    !options.expandRange &&
+    !options.onMatch &&
+    !options.onIgnore &&
+    !options.onResult;
+
+  if (canFastPath && mightUseFastPath(pattern)) {
     const fastResult = tryFastPath(path, pattern, options);
     if (fastResult !== null) {
       return fastResult;
@@ -288,7 +318,9 @@ export function match(
       );
     }
     // nonull: return the pattern itself when no matches
-    if (mm.options.nonull) {
+    // Read from the caller's options, not the cached instance's, so that
+    // cache hits don't leak behavior between calls with different options
+    if (options.nonull) {
       return [pattern];
     }
   }

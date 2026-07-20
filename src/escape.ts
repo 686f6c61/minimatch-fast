@@ -9,12 +9,16 @@
  * - Windows mode: Uses character class escaping ([*] [?] etc.)
  *
  * This is useful when you need to match file paths that contain glob
- * special characters like *, ?, [], {}, etc.
+ * special characters like *, ?, [], (), etc.
+ *
+ * Braces ({ and }) are only escaped when the magicalBraces option is set,
+ * matching the behavior of the original minimatch package.
  *
  * @example
  * escape('*.js')           // Returns '\\*.js'
  * escape('[test].js')      // Returns '\\[test\\].js'
  * escape('*.js', { windowsPathsNoEscape: true })  // Returns '[*].js'
+ * escape('{a,b}', { magicalBraces: true })        // Returns '\\{a,b\\}'
  *
  * @author 686f6c61
  * @see https://github.com/686f6c61/minimatch-fast
@@ -34,23 +38,28 @@ import type { MinimatchOptions } from './types.js';
  * If windowsPathsNoEscape is false (default), characters are escaped with
  * backslash.
  *
+ * If magicalBraces is true, braces ({ and }) are escaped as well.
+ *
  * @param str - The string to escape
  * @param options - Options controlling escape behavior
  * @returns Escaped string
  */
 export function escape(
   str: string,
-  options: Pick<MinimatchOptions, 'windowsPathsNoEscape'> = {}
+  options: Pick<MinimatchOptions, 'windowsPathsNoEscape' | 'magicalBraces'> = {}
 ): string {
-  const { windowsPathsNoEscape = false } = options;
+  const { windowsPathsNoEscape = false, magicalBraces = false } = options;
 
-  if (windowsPathsNoEscape) {
-    // Escape by wrapping in character class []
-    // Don't escape backslash since it's a path separator in this mode
-    return str.replace(/[?*()[\]{}]/g, '[$&]');
+  // Don't need to escape +@! because we escape the parens that make them
+  // magic, and escaping ! as [!] isn't valid, because [!]] is a valid glob
+  // class meaning "not ]".
+  if (magicalBraces) {
+    return windowsPathsNoEscape
+      ? str.replace(/[?*()[\]{}]/g, '[$&]')
+      : str.replace(/[?*()[\]\\{}]/g, '\\$&');
   }
 
-  // Default: escape with backslash
-  // Include backslash in the escape set
-  return str.replace(/[?*()[\]{}\\]/g, '\\$&');
+  return windowsPathsNoEscape
+    ? str.replace(/[?*()[\]]/g, '[$&]')
+    : str.replace(/[?*()[\]\\]/g, '\\$&');
 }

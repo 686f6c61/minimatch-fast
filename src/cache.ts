@@ -38,31 +38,74 @@ const CACHE_SIZE = 500;
 const patternCache = new Map<string, Minimatch>();
 
 /**
+ * Identity map for function-valued options.
+ * Functions cannot be serialized into a cache key, so each distinct
+ * function gets a stable numeric id for the lifetime of the process.
+ */
+const fnIds = new WeakMap<object, number>();
+let nextFnId = 1;
+
+/**
+ * Get a stable id for a function-valued option (or '' if absent).
+ */
+function fnId(fn: unknown): string | number {
+  if (typeof fn !== 'function') return '';
+  let id = fnIds.get(fn);
+  if (id === undefined) {
+    id = nextFnId++;
+    fnIds.set(fn, id);
+  }
+  return id;
+}
+
+/**
  * Generate a cache key from pattern and options.
- * Only includes options that affect pattern compilation.
+ * Includes every option that affects pattern compilation or matching.
+ * Options that do NOT affect results (debug, nonull, failglob) are
+ * intentionally excluded.
  *
  * @param pattern - The glob pattern
  * @param options - Minimatch options
  * @returns A unique cache key string
  */
 function getCacheKey(pattern: string, options: MinimatchOptions): string {
-  // Use null byte as separator (cannot appear in patterns)
-  // Include all options that affect compilation
-  return `${pattern}\0${
-    options.nocase ? '1' : '0'
-  }${options.dot ? '1' : '0'}${
-    options.noglobstar ? '1' : '0'
-  }${options.nobrace ? '1' : '0'}${
-    options.noext ? '1' : '0'
-  }${options.nonegate ? '1' : '0'}${
-    options.nocomment ? '1' : '0'
-  }${options.matchBase ? '1' : '0'}${
-    options.flipNegate ? '1' : '0'
-  }${options.windowsPathsNoEscape ? '1' : '0'}${
-    options.preserveMultipleSlashes ? '1' : '0'
-  }${options.partial ? '1' : '0'}${
-    options.platform ?? ''
-  }`;
+  // Use null byte as separator (cannot appear in patterns).
+  // JSON.stringify handles arrays (ignore) and undefined uniformly.
+  return `${pattern}\0${JSON.stringify([
+    options.nocase,
+    options.dot,
+    options.noglobstar,
+    options.nobrace,
+    options.noext,
+    options.nonegate,
+    options.nocomment,
+    options.matchBase,
+    options.flipNegate,
+    options.windowsPathsNoEscape,
+    options.allowWindowsEscape,
+    options.preserveMultipleSlashes,
+    options.partial,
+    options.platform,
+    options.magicalBraces,
+    options.nocaseMagicOnly,
+    options.optimizationLevel,
+    options.windowsNoMagicRoot,
+    options.ignore,
+    options.maxLength,
+    options.bash,
+    options.contains,
+    options.flags,
+    options.strictBrackets,
+    options.literalBrackets,
+    options.keepQuotes,
+    options.unescape,
+    // Function-valued options: keyed by identity
+    fnId(options.expandRange),
+    fnId(options.format),
+    fnId(options.onMatch),
+    fnId(options.onIgnore),
+    fnId(options.onResult),
+  ])}`;
 }
 
 /**

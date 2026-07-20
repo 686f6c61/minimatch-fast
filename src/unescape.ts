@@ -5,8 +5,12 @@
  * reversing the operation performed by the escape() function.
  *
  * Unescape modes:
- * - Default mode: Removes backslash escaping (\\* -> *)
- * - Windows mode: Removes character class escaping ([*] -> *)
+ * - Default mode: Removes backslash escaping (\\* -> *) and square-bracket
+ *   escaping ([*] -> *)
+ * - Windows mode: Removes character class escaping ([*] -> *) but not
+ *   backslash escapes (since backslash is a path separator in this mode)
+ *
+ * When magicalBraces is false, escapes of braces ({ and }) are not removed.
  *
  * This is useful when you need to convert escaped patterns back to their
  * original form for display or further processing.
@@ -28,7 +32,10 @@ import type { MinimatchOptions } from './types.js';
  * If windowsPathsNoEscape is true, square-bracket escapes are removed,
  * but not backslash escapes (since backslash is a path separator in this mode).
  *
- * If windowsPathsNoEscape is false (default), backslash escapes are removed.
+ * If windowsPathsNoEscape is false (default), both square-bracket escapes
+ * and backslash escapes are removed.
+ *
+ * If magicalBraces is false, escapes of braces ({ and }) are left in place.
  *
  * @param str - The string to unescape
  * @param options - Options controlling unescape behavior
@@ -36,18 +43,21 @@ import type { MinimatchOptions } from './types.js';
  */
 export function unescape(
   str: string,
-  options: Pick<MinimatchOptions, 'windowsPathsNoEscape'> = {}
+  options: Pick<MinimatchOptions, 'windowsPathsNoEscape' | 'magicalBraces'> = {}
 ): string {
-  const { windowsPathsNoEscape = false } = options;
+  const { windowsPathsNoEscape = false, magicalBraces = true } = options;
 
-  if (windowsPathsNoEscape) {
-    // Remove square-bracket escapes: [x] -> x
-    // But only for single non-special characters
-    // Don't touch things like [abc] or [a-z]
-    return str.replace(/\[([^\/\\[\]{}])\]/g, '$1');
+  if (magicalBraces) {
+    return windowsPathsNoEscape
+      ? str.replace(/\[([^\/\\])\]/g, '$1')
+      : str
+          .replace(/((?!\\).|^)\[([^\/\\])\]/g, '$1$2')
+          .replace(/\\([^\/])/g, '$1');
   }
 
-  // Default: remove backslash escapes
-  // \x -> x (but not for forward slash which can't be escaped)
-  return str.replace(/\\([^/])/g, '$1');
+  return windowsPathsNoEscape
+    ? str.replace(/\[([^\/\\{}])\]/g, '$1')
+    : str
+        .replace(/((?!\\).|^)\[([^\/\\{}])\]/g, '$1$2')
+        .replace(/\\([^\/{}])/g, '$1');
 }

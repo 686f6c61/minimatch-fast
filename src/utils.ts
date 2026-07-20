@@ -16,7 +16,7 @@
  * @license MIT
  */
 
-import type { Platform, Sep } from './types';
+import type { Platform, Sep } from './types.js';
 
 /**
  * Detect the current platform
