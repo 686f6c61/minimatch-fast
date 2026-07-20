@@ -1,14 +1,17 @@
 ---
-const benchmarks = [
-  { pattern: 'Simple star (*.js)', minimatch: 'Baseline', fast: '6.5x faster', highlight: true },
-  { pattern: 'Globstar (**/*.js)', minimatch: 'Baseline', fast: '5.9x faster', highlight: true },
-  { pattern: 'Brace patterns ({a,b})', minimatch: 'Baseline', fast: '15.1x faster', highlight: true },
-  { pattern: 'Complex braces', minimatch: 'Baseline', fast: '26.6x faster', highlight: true },
-  { pattern: 'Character class ([0-9])', minimatch: 'Baseline', fast: '7.3x faster', highlight: true },
-  { pattern: 'Negation patterns (!*.min.js)', minimatch: 'Baseline', fast: '6.5x faster', highlight: true },
-  { pattern: 'Pre-compiled class', minimatch: 'Baseline', fast: '1.5x faster', highlight: false },
-  { pattern: 'Cache (warm vs cold)', minimatch: 'N/A', fast: '12x faster', highlight: true },
-  { pattern: 'Fast-path (simple patterns)', minimatch: 'Baseline', fast: '6x faster', highlight: true },
+const warmRows = [
+  { scenario: 'Warm function API, {src,lib}/**/*.{js,ts,tsx}', fast: '17x faster', highlight: true },
+  { scenario: 'Warm function API, @(foo|bar|baz).js', fast: '7x faster', highlight: true },
+  { scenario: 'Warm function API, *.js / **/*.js', fast: '2.6-2.8x faster', highlight: true },
+];
+
+const engineRows = [
+  { scenario: 'Pre-compiled engine, file[0-9].js', fast: '2.3x faster', highlight: true },
+  { scenario: 'Pre-compiled engine, **/*.js', fast: '1.3x faster', highlight: true },
+  { scenario: 'Pre-compiled engine, @(foo|bar|baz).js', fast: '1.25x faster', highlight: false },
+  { scenario: 'Pre-compiled engine, *.js / !*.test.js / ???.js', fast: '~1x (parity)', highlight: false },
+  { scenario: 'Pre-compiled engine, brace-heavy patterns', fast: '0.3-0.4x (slower)', highlight: false },
+  { scenario: 'Cold single calls (every call compiles)', fast: '~1x (parity)', highlight: false },
 ];
 
 const securityComparison = [
@@ -23,23 +26,28 @@ const securityComparison = [
     <div class="section-header">
       <span class="cmd">benchmark</span>
       <h2>Performance Benchmarks</h2>
-      <p>Real measurements comparing minimatch-fast vs minimatch v10.x</p>
+      <p>Honest measurements vs minimatch v10.x — median of 15 rounds, A/B/B/A interleaved, 1000-path deterministic corpus</p>
     </div>
 
+    <h3 class="table-heading">Real-world globbing (LRU cache)</h3>
+    <p class="table-note">
+      Build tools and linters match the same patterns against thousands of files.
+      minimatch recompiles on every call; minimatch-fast caches compiled patterns.
+    </p>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Pattern</th>
+            <th>Scenario</th>
             <th>minimatch</th>
             <th>minimatch-fast</th>
           </tr>
         </thead>
         <tbody>
-          {benchmarks.map(row => (
+          {warmRows.map(row => (
             <tr>
-              <td><code>{row.pattern}</code></td>
-              <td>{row.minimatch}</td>
+              <td><code>{row.scenario}</code></td>
+              <td>Baseline</td>
               <td class="fast-cell"><span class={row.highlight ? 'badge' : ''}>{row.fast}</span></td>
             </tr>
           ))}
@@ -47,7 +55,34 @@ const securityComparison = [
       </table>
     </div>
 
-    <h3 class="security-heading">Security Comparison</h3>
+    <h3 class="table-heading">Engine vs engine (no cache)</h3>
+    <p class="table-note">
+      Pre-compiled instances on both sides. picomatch wins on globstar and character
+      classes, ties on simple patterns, and is currently slower on brace-heavy
+      patterns (one matcher per brace expansion — single-matcher compilation is on the roadmap).
+    </p>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>minimatch</th>
+            <th>minimatch-fast</th>
+          </tr>
+        </thead>
+        <tbody>
+          {engineRows.map(row => (
+            <tr>
+              <td><code>{row.scenario}</code></td>
+              <td>Baseline</td>
+              <td class="fast-cell"><span class={row.highlight ? 'badge' : ''}>{row.fast}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="table-heading">Security Comparison</h3>
 
     <div class="table-wrapper">
       <table>
@@ -71,16 +106,23 @@ const securityComparison = [
     </div>
 
     <p class="benchmark-note">
-      Benchmarks run on Node.js with 10,000 iterations per pattern.
-      Results may vary based on hardware and pattern complexity.
+      Node.js 22, Linux. Reproduce with <code>npm run benchmark</code> — it prints
+      the full environment and all four scenarios.
     </p>
   </div>
 </section>
 
 <style>
-  .security-heading {
+  .table-heading {
     margin-top: var(--space-md);
+    margin-bottom: var(--space-xs);
     font-size: .95rem;
+  }
+
+  .table-note {
+    font-size: .78rem;
+    color: var(--text-muted);
+    margin-bottom: var(--space-sm);
   }
 
   .danger {
