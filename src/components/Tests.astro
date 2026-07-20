@@ -1,14 +1,15 @@
 ---
 import CodeBlock from './CodeBlock.astro';
+import { useTranslations, type Lang } from '../i18n';
 
-const testCategories = [
-  { name: 'Unit Tests', count: 42, description: 'Core functionality tests' },
-  { name: 'Compatibility Tests', count: 196, description: 'Behavior parity with minimatch' },
-  { name: 'Edge Case Tests', count: 64, description: 'Windows paths, extended options, dotfiles' },
-  { name: 'Security Tests', count: 23, description: 'CVE-2022-3517 and input validation tests' },
-  { name: 'Verification Tests', count: 53, description: 'POSIX classes, Unicode, regex edge cases' },
-  { name: 'Regression Tests', count: 24, description: 'Cache correctness, hasMagic, makeRe, escape alignment' },
-];
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang).tests;
+
+const testCategories = t.categories;
 
 const runTests = `# Run all tests
 npm test
@@ -24,8 +25,8 @@ npm run test:compat`;
   <div class="container">
     <div class="section-header">
       <span class="cmd">tests</span>
-      <h2>Testing & Compatibility</h2>
-      <p>Comprehensive test suite ensures reliability</p>
+      <h2>{t.heading}</h2>
+      <p>{t.sub}</p>
     </div>
 
     <div class="test-grid">
@@ -39,28 +40,26 @@ npm run test:compat`;
     </div>
 
     <div class="card test-details">
-      <h3><span class="badge">402 tests total</span></h3>
+      <h3><span class="badge">{t.totalBadge}</span></h3>
       <p>
-        Every release is verified against the original minimatch test suite plus
-        additional tests for edge cases, Windows paths, and security vulnerabilities.
+        {t.totalText}
       </p>
 
-      <h3>Running Tests</h3>
-      <CodeBlock lang="bash" code={runTests} />
+      <h3>{t.runHeading}</h3>
+      <CodeBlock lang="bash" code={runTests} locale={lang} />
 
-      <h3>Reporting Issues</h3>
+      <h3>{t.reportHeading}</h3>
       <p>
-        Found a compatibility issue? Please open an issue on GitHub with:
+        {t.reportIntro}
       </p>
       <ul class="list-minimal">
-        <li>The pattern and path that produces different results</li>
-        <li>Expected behavior (what minimatch returns)</li>
-        <li>Actual behavior (what minimatch-fast returns)</li>
-        <li>Any relevant options used</li>
+        {t.reportItems.map(item => (
+          <li>{item}</li>
+        ))}
       </ul>
       <p class="issue-link">
         <a href="https://github.com/686f6c61/minimatch-fast/issues" target="_blank" rel="noopener noreferrer">
-          Open an issue on GitHub
+          {t.reportLink}
         </a>
       </p>
     </div>

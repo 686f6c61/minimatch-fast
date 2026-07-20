@@ -1,0 +1,38 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Hero from '../../components/Hero.astro';
+import Features from '../../components/Features.astro';
+import Benchmark from '../../components/Benchmark.astro';
+import Install from '../../components/Install.astro';
+import Usage from '../../components/Usage.astro';
+import Patterns from '../../components/Patterns.astro';
+import Api from '../../components/Api.astro';
+import Options from '../../components/Options.astro';
+import Security from '../../components/Security.astro';
+import TypeScript from '../../components/TypeScript.astro';
+import Tests from '../../components/Tests.astro';
+import Changelog from '../../components/Changelog.astro';
+import Footer from '../../components/Footer.astro';
+
+const lang = 'en';
+---
+
+<Layout lang={lang}>
+  <Header lang={lang} />
+  <main id="content">
+    <Hero lang={lang} />
+    <Features lang={lang} />
+    <Benchmark lang={lang} />
+    <Install lang={lang} />
+    <Usage lang={lang} />
+    <Patterns lang={lang} />
+    <Api lang={lang} />
+    <Options lang={lang} />
+    <Security lang={lang} />
+    <TypeScript lang={lang} />
+    <Tests lang={lang} />
+    <Changelog lang={lang} />
+  </main>
+  <Footer lang={lang} />
+</Layout>

@@ -1,28 +1,37 @@
 ---
 import CodeBlock from './CodeBlock.astro';
+import { useTranslations, type Lang } from '../i18n';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang).install;
 ---
 
 <section class="fade-in" id="install">
   <div class="container">
     <div class="section-header">
       <span class="cmd">install</span>
-      <h2>Installation</h2>
-      <p>Two ways to upgrade from minimatch</p>
+      <h2>{t.heading}</h2>
+      <p>{t.sub}</p>
     </div>
 
     <div class="install-grid">
       <div class="card install-option">
-        <h3><span class="badge">option 1</span> Update imports</h3>
-        <p>Install the package and update your import statements:</p>
+        <h3><span class="badge">{t.option1Badge}</span> {t.option1Title}</h3>
+        <p>{t.option1Intro}</p>
 
         <CodeBlock
           lang="bash"
           title="Terminal"
+          locale={lang}
           code={`npm uninstall minimatch
 npm install minimatch-fast`}
         />
 
-        <p>Then update your imports:</p>
+        <p>{t.option1Then}</p>
 
         <div class="diff-block">
           <pre><code><span class="diff-remove">- const minimatch = require('minimatch');</span>
@@ -36,19 +45,20 @@ npm install minimatch-fast`}
       </div>
 
       <div class="card install-option">
-        <h3><span class="badge">option 2</span> npm aliasing</h3>
-        <p>Zero code changes required. Use npm's package aliasing:</p>
+        <h3><span class="badge">{t.option2Badge}</span> {t.option2Title}</h3>
+        <p>{t.option2Intro}</p>
 
         <CodeBlock
           lang="bash"
           title="Terminal"
+          locale={lang}
           code="npm install minimatch@npm:minimatch-fast"
         />
 
-        <p>This installs minimatch-fast as <code>minimatch</code>, so all your existing imports continue to work without any changes.</p>
+        <p>{t.option2DetailPre} <code>minimatch</code>{t.option2DetailPost}</p>
 
         <div class="alias-note">
-          <strong>Note:</strong> This also updates minimatch for all your dependencies that use it.
+          <strong>{t.option2NoteStrong}</strong> {t.option2Note}
         </div>
       </div>
     </div>
@@ -86,6 +96,7 @@ npm install minimatch-fast`}
     margin: 0;
     border: none;
     border-radius: 0;
+    overflow-x: auto;
   }
 
   .diff-remove {

@@ -1,28 +1,35 @@
 ---
+import { useTranslations, type Lang } from '../i18n';
+
 interface Props {
   code: string;
   lang?: string;
+  locale?: Lang;
   title?: string;
   showCopy?: boolean;
 }
 
-const { code, lang = 'javascript', title, showCopy = true } = Astro.props;
+const { code, lang = 'javascript', locale = 'es', title, showCopy = true } = Astro.props;
+const t = useTranslations(locale).codeBlock;
 ---
 
 <div class="code-block">
-  {title && <div class="code-block-header">{title}</div>}
-  <div class="code-block-content">
-    <pre><code class={`language-${lang}`}>{code.trim()}</code></pre>
-    {showCopy && (
-      <button class="copy-btn" data-code={code.trim()} aria-label="Copy code">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-        </svg>
-        <span class="copy-text">copy</span>
-      </button>
-    )}
-  </div>
+  {(title || showCopy) && (
+    <div class="code-block-header">
+      <span class="code-block-label">{title ?? lang}</span>
+      {showCopy && (
+        <button class="copy-btn" data-code={code.trim()} aria-label={t.copyAria}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          <span class="copy-text">{t.copy}</span>
+          <span class="copied-text">{t.copied}</span>
+        </button>
+      )}
+    </div>
+  )}
+  <pre><code class={`language-${lang}`}>{code.trim()}</code></pre>
 </div>
 
 <style>
@@ -34,17 +41,26 @@ const { code, lang = 'javascript', title, showCopy = true } = Astro.props;
     background: var(--card-bg);
   }
 
+  /* Header row: language/title label on the left, copy button on the right.
+     The button lives here (not absolutely positioned over the code), so it
+     can never overlap the text. */
   .code-block-header {
-    padding: .4rem .8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .3rem .5rem .3rem .8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-block-label {
     font-size: .68rem;
     font-weight: 600;
     color: var(--text-muted);
-    border-bottom: 1px solid var(--border);
     font-family: var(--font-mono);
-  }
-
-  .code-block-content {
-    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .code-block pre {
@@ -53,16 +69,14 @@ const { code, lang = 'javascript', title, showCopy = true } = Astro.props;
     border: none;
     border-radius: 0;
     background: var(--card-bg);
+    overflow-x: auto;
   }
 
   .copy-btn {
-    position: absolute;
-    top: .5rem;
-    right: .5rem;
     display: flex;
     align-items: center;
     gap: .3rem;
-    padding: .3rem .5rem;
+    padding: .25rem .5rem;
     font-size: .68rem;
     font-family: var(--font-mono);
     color: var(--text-muted);
@@ -71,6 +85,7 @@ const { code, lang = 'javascript', title, showCopy = true } = Astro.props;
     border-radius: 4px;
     cursor: pointer;
     transition: color .15s ease, border-color .15s ease;
+    flex-shrink: 0;
   }
 
   .copy-btn:hover,
@@ -79,8 +94,9 @@ const { code, lang = 'javascript', title, showCopy = true } = Astro.props;
     border-color: var(--accent);
   }
 
+  .copy-btn .copied-text { display: none; }
   .copy-btn.copied .copy-text { display: none; }
-  .copy-btn.copied::after { content: 'copied!'; }
+  .copy-btn.copied .copied-text { display: inline; }
 </style>
 
 <script>

@@ -5,47 +5,26 @@ import Stable from './icons/Stable.astro';
 import Check from './icons/Check.astro';
 import TypeScriptIcon from './icons/TypeScript.astro';
 import Package from './icons/Package.astro';
+import { useTranslations, type Lang } from '../i18n';
 
-const features = [
-  {
-    icon: Speed,
-    title: 'Lightning Fast',
-    description: 'up to 29x faster than minimatch. Powered by picomatch engine with LRU caching and optimized fast paths for common patterns.'
-  },
-  {
-    icon: Shield,
-    title: 'Secure',
-    description: 'Not vulnerable to CVE-2022-3517 (ReDoS). Built-in protection against catastrophic backtracking and DoS attacks.'
-  },
-  {
-    icon: Stable,
-    title: 'Stable',
-    description: 'Never freezes on patterns like {1..1000}. Limits on brace expansion prevent hanging or memory issues.'
-  },
-  {
-    icon: Check,
-    title: '100% Compatible',
-    description: 'Drop-in replacement with identical API. 402 tests ensure full compatibility with minimatch v10.x behavior.'
-  },
-  {
-    icon: TypeScriptIcon,
-    title: 'TypeScript Ready',
-    description: 'Full TypeScript support with complete type definitions included. No need to install separate @types packages.'
-  },
-  {
-    icon: Package,
-    title: 'Dual Module Support',
-    description: 'Works with both ESM and CommonJS. Use import or require() - we support both module systems out of the box.'
-  }
-];
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang).features;
+
+const icons = [Speed, Shield, Stable, Check, TypeScriptIcon, Package];
+
+const features = t.items.map((item, i) => ({ ...item, icon: icons[i] }));
 ---
 
 <section class="fade-in" id="features">
   <div class="container">
     <div class="section-header">
       <span class="cmd">features</span>
-      <h2>Why minimatch-fast?</h2>
-      <p>The performance and security upgrade your glob matching needs</p>
+      <h2>{t.heading}</h2>
+      <p>{t.sub}</p>
     </div>
 
     <div class="card-grid">

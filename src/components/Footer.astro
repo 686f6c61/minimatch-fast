@@ -1,12 +1,21 @@
 ---
 import GitHub from './icons/GitHub.astro';
 import Npm from './icons/Npm.astro';
+import { useTranslations, type Lang } from '../i18n';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang).footer;
 
 const links = [
   { href: 'https://www.npmjs.com/package/minimatch-fast', label: 'npm', icon: Npm },
   { href: 'https://github.com/686f6c61/minimatch-fast', label: 'GitHub', icon: GitHub },
+  { href: 'https://x.com/686f6c61', label: 'X (Twitter)', icon: null },
   { href: 'https://github.com/686f6c61/minimatch-fast/issues', label: 'Issues', icon: null },
-  { href: 'https://github.com/686f6c61/minimatch-fast/blob/main/LICENSE', label: 'MIT License', icon: null },
+  { href: 'https://github.com/686f6c61/minimatch-fast/blob/main/LICENSE', label: t.mitLabel, icon: null },
 ];
 
 const credits = [
@@ -22,13 +31,13 @@ const credits = [
       <div class="footer-brand">
         <span class="cmd">minimatch-fast</span>
         <p class="footer-tagline">
-          Drop-in replacement for minimatch.<br />
-          Up to 29x faster. Zero vulnerabilities.
+          {t.tagline1}<br />
+          {t.tagline2}
         </p>
       </div>
 
       <div class="footer-links">
-        <h4>Links</h4>
+        <h4>{t.linksHeading}</h4>
         <ul class="list-minimal">
           {links.map(link => (
             <li>
@@ -42,7 +51,7 @@ const credits = [
       </div>
 
       <div class="footer-credits">
-        <h4>Credits</h4>
+        <h4>{t.creditsHeading}</h4>
         <ul class="list-minimal">
           {credits.map(credit => (
             <li>
@@ -58,7 +67,7 @@ const credits = [
 
     <div class="footer-bottom">
       <p>
-        MIT License. Built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer">Astro</a>.
+        {t.bottom} <a href="https://astro.build" target="_blank" rel="noopener noreferrer">Astro</a>.
       </p>
     </div>
   </div>

@@ -1,23 +1,31 @@
 ---
 import GitHub from './icons/GitHub.astro';
 import Arrow from './icons/Arrow.astro';
+import { useTranslations, type Lang } from '../i18n';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang).hero;
 ---
 
 <section class="hero fade-in">
   <div class="container">
     <div class="hero-content">
-      <span class="badge-live">v0.4.0 live on npm</span>
+      <span class="badge-live">{t.badge}</span>
 
       <h1 class="hero-title">minimatch-fast</h1>
 
       <p class="narrative hero-subtitle">
-        Drop-in replacement for minimatch.<br />
-        Up to 29x faster. Zero vulnerabilities.
+        {t.subtitle1}<br />
+        {t.subtitle2}
       </p>
 
       <div class="hero-install">
         <code class="install-command">npm install minimatch-fast</code>
-        <button class="copy-btn" data-code="npm install minimatch-fast" aria-label="Copy install command">
+        <button class="copy-btn" data-code="npm install minimatch-fast" aria-label={t.copyAria}>
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
@@ -27,7 +35,7 @@ import Arrow from './icons/Arrow.astro';
 
       <div class="hero-actions">
         <a href="#install" class="btn primary">
-          Get Started
+          {t.cta}
           <Arrow size={14} />
         </a>
         <a href="https://github.com/686f6c61/minimatch-fast" class="btn" target="_blank" rel="noopener noreferrer">
@@ -37,16 +45,14 @@ import Arrow from './icons/Arrow.astro';
       </div>
 
       <ul class="chips hero-chips">
-        <li class="chip">picomatch engine</li>
-        <li class="chip">100% API compatible</li>
-        <li class="chip">TypeScript</li>
-        <li class="chip">ESM + CJS</li>
-        <li class="chip">402 tests</li>
+        {t.chips.map(chip => (
+          <li class="chip">{chip}</li>
+        ))}
       </ul>
 
       <p class="hero-license">
         <a href="https://github.com/686f6c61/minimatch-fast/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">
-          MIT License
+          {t.license}
         </a>
       </p>
     </div>

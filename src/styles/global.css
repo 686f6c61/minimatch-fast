@@ -215,6 +215,8 @@ main > section:last-child { border-bottom: none; }
   font-size: .7rem;
   font-weight: 600;
   line-height: 1.6;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Small bordered chips */

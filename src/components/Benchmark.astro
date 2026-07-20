@@ -1,101 +1,115 @@
 ---
-const warmRows = [
-  { scenario: 'Warm function API, {src,lib}/**/*.{js,ts,tsx}', fast: '29x faster', highlight: true },
-  { scenario: 'Warm function API, @(foo|bar|baz).js', fast: '8.7x faster', highlight: true },
-  { scenario: 'Warm function API, *.js / **/*.js', fast: '3-3.3x faster', highlight: true },
-];
+import { useTranslations, type Lang } from '../i18n';
 
-const engineRows = [
-  { scenario: 'Pre-compiled engine, file[0-9].js', fast: '6.2x faster', highlight: true },
-  { scenario: 'Pre-compiled engine, @(foo|bar|baz).js', fast: '3.6x faster', highlight: true },
-  { scenario: 'Pre-compiled engine, {src,lib}/**/*.{js,ts,tsx}', fast: '3.4x faster', highlight: true },
-  { scenario: 'Pre-compiled engine, *.js / **/*.js', fast: '2.6x faster', highlight: true },
-  { scenario: 'Pre-compiled engine, {src,lib}/*.js (2-way brace)', fast: '0.65x (slower)', highlight: false },
-  { scenario: 'Cold single calls (every call compiles)', fast: 'parity to 2.3x', highlight: false },
-];
+interface Props {
+  lang?: Lang;
+}
 
-const securityComparison = [
-  { feature: 'CVE-2022-3517 (ReDoS)', minimatch: 'Vulnerable', fast: 'Not affected', danger: true },
-  { feature: 'Pattern {1..1000}', minimatch: 'Freezes', fast: 'Instant', danger: true },
-  { feature: 'Brace expansion limit', minimatch: 'None', fast: '10,000 max', danger: false },
-];
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang).benchmark;
 ---
 
 <section class="fade-in" id="benchmarks">
   <div class="container">
     <div class="section-header">
       <span class="cmd">benchmark</span>
-      <h2>Performance Benchmarks</h2>
-      <p>Honest measurements vs minimatch v10.x — median of 15 rounds, A/B/B/A interleaved, 1000-path deterministic corpus</p>
+      <h2>{t.heading}</h2>
+      <p>{t.sub}</p>
     </div>
 
-    <h3 class="table-heading">Real-world globbing (LRU cache)</h3>
+    <h3 class="table-heading">{t.warm.heading}</h3>
     <p class="table-note">
-      Build tools and linters match the same patterns against thousands of files.
-      minimatch recompiles on every call; minimatch-fast caches compiled patterns.
+      {t.warm.note}
     </p>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Scenario</th>
+            <th>{t.cols.pattern}</th>
+            <th>minimatch</th>
+            <th>minimatch-fast</th>
+            <th>{t.cols.speedup}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {t.warm.rows.map(row => (
+            <tr>
+              <td><code>{row.scenario}</code></td>
+              <td>{row.minimatch}</td>
+              <td>{row.fast}</td>
+              <td class="fast-cell"><span class={row.highlight ? 'badge' : ''}>{row.speedup}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">
+      {t.warm.earlyRejection}
+    </p>
+
+    <h3 class="table-heading">{t.engine.heading}</h3>
+    <p class="table-note">
+      {t.engine.note}
+    </p>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>{t.cols.pattern}</th>
             <th>minimatch</th>
             <th>minimatch-fast</th>
           </tr>
         </thead>
         <tbody>
-          {warmRows.map(row => (
+          {t.engine.rows.map(row => (
             <tr>
               <td><code>{row.scenario}</code></td>
-              <td>Baseline</td>
-              <td class="fast-cell"><span class={row.highlight ? 'badge' : ''}>{row.fast}</span></td>
+              <td>{t.baseline}</td>
+              <td class="fast-cell"><span class={row.highlight ? 'badge' : ''}>{row.speedup}</span></td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
 
-    <h3 class="table-heading">Engine vs engine (no cache)</h3>
+    <h3 class="table-heading">{t.compileCold.heading}</h3>
     <p class="table-note">
-      Pre-compiled instances on both sides. Brace patterns compile natively into a
-      single regex and multiple expansions share one matcher, winning 2-6x on most
-      shapes. The one remaining slower case is the simple 2-way brace, where
-      minimatch's regex is unusually efficient (~150ns per call in absolute terms).
+      {t.compileCold.note}
     </p>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Scenario</th>
+            <th>{t.cols.scenario}</th>
             <th>minimatch</th>
             <th>minimatch-fast</th>
           </tr>
         </thead>
         <tbody>
-          {engineRows.map(row => (
+          {t.compileCold.rows.map(row => (
             <tr>
               <td><code>{row.scenario}</code></td>
-              <td>Baseline</td>
-              <td class="fast-cell"><span class={row.highlight ? 'badge' : ''}>{row.fast}</span></td>
+              <td>{t.baseline}</td>
+              <td class="fast-cell"><span class={row.highlight ? 'badge' : ''}>{row.speedup}</span></td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
 
-    <h3 class="table-heading">Security Comparison</h3>
+    <h3 class="table-heading">{t.security.heading}</h3>
 
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Feature</th>
+            <th>{t.security.featureCol}</th>
             <th>minimatch</th>
             <th>minimatch-fast</th>
           </tr>
         </thead>
         <tbody>
-          {securityComparison.map(row => (
+          {t.security.rows.map(row => (
             <tr>
               <td>{row.feature}</td>
               <td class={row.danger ? 'danger' : ''}>{row.minimatch}</td>
@@ -107,8 +121,7 @@ const securityComparison = [
     </div>
 
     <p class="benchmark-note">
-      Node.js 22, Linux. Reproduce with <code>npm run benchmark</code> — it prints
-      the full environment and all four scenarios.
+      {t.note} <code>npm run benchmark</code>.
     </p>
   </div>
 </section>

@@ -1,24 +1,26 @@
 ---
 import '../styles/global.css';
+import { useTranslations, type Lang } from '../i18n';
+
 interface Props {
-  title: string;
-  description?: string;
+  lang?: Lang;
 }
 
-const {
-  title,
-  description = 'Drop-in replacement for minimatch. Up to 29x faster. Zero vulnerabilities. Cache-accelerated glob pattern matching for Node.js.'
-} = Astro.props;
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang);
 
 const siteUrl = 'https://minimatch-fast.686f6c61.dev';
 const siteName = 'minimatch-fast';
+const canonicalUrl = lang === 'en' ? `${siteUrl}/en/` : `${siteUrl}/`;
+const ogLocale = lang === 'en' ? 'en_US' : 'es_ES';
+const ogLocaleAlternate = lang === 'en' ? 'es_ES' : 'en_US';
 
 // Structured data for SEO (SoftwareApplication schema)
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "minimatch-fast",
-  "description": "Drop-in replacement for minimatch. Up to 29x faster glob pattern matching for Node.js. Zero vulnerabilities, 100% API compatible.",
+  "description": t.layout.jsonLdDescription,
   "url": siteUrl,
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Cross-platform",
@@ -37,24 +39,29 @@ const structuredData = {
   "runtimePlatform": "Node.js",
   "softwareVersion": "0.4.0",
   "downloadUrl": "https://www.npmjs.com/package/minimatch-fast",
-  "releaseNotes": "Cache correctness fixes, hasMagic()/makeRe() alignment with minimatch, escape/unescape 1:1 compat. 402 tests. Published via npm trusted publishing (OIDC) with provenance.",
-  "keywords": ["glob", "minimatch", "pattern matching", "fast", "performance", "nodejs", "javascript", "typescript"]
+  "releaseNotes": t.layout.jsonLdReleaseNotes,
+  "keywords": t.layout.jsonLdKeywords
 };
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
+    <meta name="description" content={t.page.description} />
     <meta name="generator" content={Astro.generator} />
 
     <!-- SEO Meta Tags -->
-    <meta name="keywords" content="minimatch, glob, pattern matching, fast, performance, nodejs, javascript, typescript, picomatch, file matching, wildcard, regex, npm package" />
+    <meta name="keywords" content={t.layout.metaKeywords} />
     <meta name="author" content="686f6c61" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href={siteUrl} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Hreflang -->
+    <link rel="alternate" hreflang="es" href={`${siteUrl}/`} />
+    <link rel="alternate" hreflang="en" href={`${siteUrl}/en/`} />
+    <link rel="alternate" hreflang="x-default" href={`${siteUrl}/`} />
 
     <!-- Performance & Security -->
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
@@ -76,23 +83,24 @@ const structuredData = {
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={siteUrl} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={t.page.title} />
+    <meta property="og:description" content={t.page.description} />
     <meta property="og:site_name" content={siteName} />
-    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:locale:alternate" content={ogLocaleAlternate} />
     <meta property="og:image" content={`${siteUrl}/og_image.png`} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="minimatch-fast - up to 29x faster glob pattern matching" />
+    <meta property="og:image:alt" content={t.layout.ogImageAlt} />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content={siteUrl} />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:url" content={canonicalUrl} />
+    <meta name="twitter:title" content={t.page.title} />
+    <meta name="twitter:description" content={t.page.description} />
     <meta name="twitter:image" content={`${siteUrl}/og_image.png`} />
-    <meta name="twitter:image:alt" content="minimatch-fast - up to 29x faster glob pattern matching" />
+    <meta name="twitter:image:alt" content={t.layout.ogImageAlt} />
 
     <!-- Additional SEO -->
     <meta name="application-name" content={siteName} />
@@ -104,10 +112,10 @@ const structuredData = {
     <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <title>{title}</title>
+    <title>{t.page.title}</title>
   </head>
   <body>
-    <a href="#content" class="skip-link">Skip to content</a>
+    <a href="#content" class="skip-link">{t.layout.skipLink}</a>
     <slot />
   </body>
 </html>

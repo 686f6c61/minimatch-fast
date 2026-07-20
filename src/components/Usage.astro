@@ -1,5 +1,13 @@
 ---
 import CodeBlock from './CodeBlock.astro';
+import { useTranslations, type Lang } from '../i18n';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang).usage;
 
 const basicExample = `import minimatch from 'minimatch-fast';
 
@@ -72,39 +80,39 @@ minimatch.unescape('\\\\[foo\\\\].js');
   <div class="container-wide">
     <div class="section-header">
       <span class="cmd">usage</span>
-      <h2>Usage Examples</h2>
-      <p>Common patterns and use cases</p>
+      <h2>{t.heading}</h2>
+      <p>{t.sub}</p>
     </div>
 
     <div class="examples-grid">
       <div class="example">
-        <h3>Basic Matching</h3>
-        <CodeBlock lang="javascript" code={basicExample} />
+        <h3>{t.examples[0].title}</h3>
+        <CodeBlock lang="javascript" code={basicExample} locale={lang} />
       </div>
 
       <div class="example">
-        <h3>Match Array</h3>
-        <CodeBlock lang="javascript" code={matchArrayExample} />
+        <h3>{t.examples[1].title}</h3>
+        <CodeBlock lang="javascript" code={matchArrayExample} locale={lang} />
       </div>
 
       <div class="example">
-        <h3>Filter Function</h3>
-        <CodeBlock lang="javascript" code={filterExample} />
+        <h3>{t.examples[2].title}</h3>
+        <CodeBlock lang="javascript" code={filterExample} locale={lang} />
       </div>
 
       <div class="example">
-        <h3>Minimatch Class</h3>
-        <CodeBlock lang="javascript" code={classExample} />
+        <h3>{t.examples[3].title}</h3>
+        <CodeBlock lang="javascript" code={classExample} locale={lang} />
       </div>
 
       <div class="example">
-        <h3>Brace Expansion</h3>
-        <CodeBlock lang="javascript" code={braceExample} />
+        <h3>{t.examples[4].title}</h3>
+        <CodeBlock lang="javascript" code={braceExample} locale={lang} />
       </div>
 
       <div class="example">
-        <h3>Escape / Unescape</h3>
-        <CodeBlock lang="javascript" code={escapeExample} />
+        <h3>{t.examples[5].title}</h3>
+        <CodeBlock lang="javascript" code={escapeExample} locale={lang} />
       </div>
     </div>
   </div>

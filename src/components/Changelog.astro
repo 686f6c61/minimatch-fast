@@ -1,151 +1,23 @@
 ---
-const versions = [
-  {
-    version: '0.4.0',
-    date: '20/07/2026',
-    tag: 'Current',
-    highlights: [
-      'Cache correctness fixes',
-      'hasMagic() and makeRe() parity with minimatch',
-      'escape/unescape 1:1 alignment',
-      '402 tests'
-    ],
-    changes: [
-      { type: 'fixed', text: 'Cache key now includes every matching-affecting option (contains, bash, flags, ignore, maxLength, strictBrackets, literalBrackets, keepQuotes, unescape, magicalBraces)' },
-      { type: 'fixed', text: 'hasMagic() returns false for literal patterns, matching minimatch' },
-      { type: 'fixed', text: 'makeRe() honors negated patterns (!*.js), matching minimatch' },
-      { type: 'fixed', text: 'nonull option no longer leaks between calls through the pattern cache' },
-      { type: 'changed', text: 'escape()/unescape() aligned 1:1 with minimatch: braces only escaped with magicalBraces: true' },
-      { type: 'changed', text: 'Fast paths fall back to the full engine when options they cannot honor are present' },
-      { type: 'security', text: 'maxLength is now also enforced before fast-path matching' },
-      { type: 'security', text: 'Releases published via npm trusted publishing (OIDC) with Sigstore provenance' },
-      { type: 'added', text: '24 new regression tests (402 total)' },
-    ]
-  },
-  {
-    version: '0.3.0',
-    date: '01/02/2026',
-    highlights: [
-      '15 new picomatch options',
-      'Callback support',
-      'Better error messages',
-      '378 tests'
-    ],
-    changes: [
-      { type: 'added', text: 'Extended picomatch options: ignore, failglob, maxLength, expandRange, bash, contains, format, flags' },
-      { type: 'added', text: 'Bracket options: strictBrackets, literalBrackets, keepQuotes, unescape' },
-      { type: 'added', text: 'Callback options: onMatch, onIgnore, onResult' },
-      { type: 'changed', text: 'Improved maxLength error messages with pattern length and limit details' },
-      { type: 'changed', text: 'failglob now shows how many paths were searched' },
-      { type: 'security', text: 'maxLength now validates for positive finite numbers' },
-      { type: 'added', text: '22 new tests for extended options' },
-    ]
-  },
-  {
-    version: '0.2.3',
-    date: '01/02/2026',
-    highlights: [
-      'Input validation for path',
-      'Clean code improvements',
-      'Dead code removal',
-      '356 tests'
-    ],
-    changes: [
-      { type: 'security', text: 'Added type validation for path parameter in minimatch()' },
-      { type: 'changed', text: 'Fixed generic error message to descriptive message' },
-      { type: 'removed', text: 'Removed console.warn from library code' },
-      { type: 'removed', text: 'Removed dead code (hasMagicChars, escapeRegex, hasBraces)' },
-      { type: 'changed', text: 'Consistent operators (?? instead of || for defaults)' },
-      { type: 'added', text: 'Tests for path validation (5 cases)' },
-    ]
-  },
-  {
-    version: '0.2.2',
-    date: '31/01/2026',
-    highlights: [
-      'Security audit',
-      'Dependency updates',
-      'Clean code review'
-    ],
-    changes: [
-      { type: 'security', text: 'Security audit completed' },
-      { type: 'changed', text: 'Updated dependencies' },
-      { type: 'changed', text: 'Clean code improvements' },
-    ]
-  },
-  {
-    version: '0.2.1',
-    date: '19/01/2026',
-    highlights: [
-      'Pattern length validation',
-      'Landing page',
-      'Benchmarks'
-    ],
-    changes: [
-      { type: 'security', text: 'Added pattern length validation (max 65,536 chars)' },
-      { type: 'added', text: 'Landing page with documentation' },
-      { type: 'added', text: 'Benchmark suite comparing with original minimatch' },
-    ]
-  },
-  {
-    version: '0.2.0',
-    date: '29/12/2025',
-    highlights: [
-      'LRU pattern cache (500 entries)',
-      'Fast paths for simple patterns',
-      'Brace expansion cache (200 entries)',
-      'Cache utility functions'
-    ],
-    performance: '9.4x faster average',
-    changes: [
-      { type: 'added', text: 'Pattern cache for compiled Minimatch instances' },
-      { type: 'added', text: 'Fast paths for *, *.js, ???, .* patterns' },
-      { type: 'added', text: 'Brace expansion cache' },
-      { type: 'added', text: 'clearCache() and getCacheSize() utilities' },
-      { type: 'changed', text: 'Pre-computed regex flags in Minimatch class' },
-      { type: 'changed', text: 'Optimized basename extraction' },
-      { type: 'changed', text: 'Smarter Windows path normalization' },
-    ]
-  },
-  {
-    version: '0.1.0',
-    date: '10/11/2025',
-    tag: 'Initial Release',
-    highlights: [
-      '100% API compatible with minimatch',
-      'Powered by picomatch engine',
-      'Full TypeScript support',
-      'Dual ESM/CJS exports'
-    ],
-    performance: '7-29x faster',
-    changes: [
-      { type: 'added', text: 'Initial release of minimatch-fast' },
-      { type: 'added', text: '100% API compatibility with minimatch v10.x' },
-      { type: 'added', text: 'Full TypeScript support with type definitions' },
-      { type: 'added', text: 'Dual ESM and CommonJS module exports' },
-      { type: 'added', text: 'Comprehensive test suite (302 tests)' },
-      { type: 'added', text: 'GitHub Actions CI/CD pipeline' },
-      { type: 'security', text: 'Not affected by CVE-2022-3517 (ReDoS)' },
-      { type: 'security', text: 'Limits on brace expansion to prevent DoS' },
-    ]
-  }
-];
+import { useTranslations, type Lang } from '../i18n';
 
-const typeLabels: Record<string, string> = {
-  added: 'added',
-  changed: 'changed',
-  security: 'security',
-  fixed: 'fixed',
-  removed: 'removed',
-};
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang).changelog;
+
+const versions = t.versions;
+const typeLabels: Record<string, string> = t.typeLabels;
 ---
 
 <section class="fade-in" id="changelog">
   <div class="container">
     <div class="section-header">
       <span class="cmd">changelog</span>
-      <h2>Changelog</h2>
-      <p>Project evolution and version history</p>
+      <h2>{t.heading}</h2>
+      <p>{t.sub}</p>
     </div>
 
     <div class="timeline">

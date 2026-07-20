@@ -1,68 +1,35 @@
 ---
-const coreOptions = [
-  { name: 'dot', type: 'boolean', default: 'false', description: 'Match dotfiles (files starting with .). By default, * and ? do not match leading dots.' },
-  { name: 'nocase', type: 'boolean', default: 'false', description: 'Perform case-insensitive matching.' },
-  { name: 'nonegate', type: 'boolean', default: 'false', description: 'Suppress negation behavior with leading !.' },
-  { name: 'nobrace', type: 'boolean', default: 'false', description: 'Do not expand brace patterns like {a,b,c}.' },
-  { name: 'noext', type: 'boolean', default: 'false', description: 'Disable extglob patterns like ?(a|b), *(a|b), etc.' },
-  { name: 'noglobstar', type: 'boolean', default: 'false', description: 'Disable ** matching across directory boundaries.' },
-  { name: 'nocomment', type: 'boolean', default: 'false', description: 'Suppress treating # as a comment character.' },
-  { name: 'matchBase', type: 'boolean', default: 'false', description: 'If pattern has no slashes, match basename of the path. foo matches bar/baz/foo.' },
-  { name: 'partial', type: 'boolean', default: 'false', description: 'Partial match: pattern can match a portion of the path.' },
-  { name: 'flipNegate', type: 'boolean', default: 'false', description: 'Returns true for negated patterns that do not match.' },
-  { name: 'preserveMultipleSlashes', type: 'boolean', default: 'false', description: 'Do not collapse multiple slashes (a//b stays as a//b).' },
-  { name: 'optimizationLevel', type: 'number', default: '1', description: 'Regex optimization level: 0 = none, 1 = safe (default), 2 = aggressive.' },
-  { name: 'platform', type: 'string', default: 'process.platform', description: 'Platform for path handling: "win32", "darwin", "linux", etc.' },
-  { name: 'windowsPathsNoEscape', type: 'boolean', default: 'false', description: 'On Windows, treat \\ as path separator, not escape character.' },
-  { name: 'allowWindowsEscape', type: 'boolean', default: 'platform !== "win32"', description: 'Allow \\ as escape character on Windows.' },
-  { name: 'nocaseMagicOnly', type: 'boolean', default: 'false', description: 'Only apply nocase to magic portions of the pattern.' },
-  { name: 'magicalBraces', type: 'boolean', default: 'false', description: 'Treat brace expansion as magic (affects hasMagic()).' },
-  { name: 'debug', type: 'boolean', default: 'false', description: 'Enable debug output.' },
-];
+import { useTranslations, type Lang } from '../i18n';
 
-const extendedOptions = [
-  { name: 'ignore', type: 'string | string[]', default: 'undefined', description: 'Patterns to exclude from matching.' },
-  { name: 'failglob', type: 'boolean', default: 'false', description: 'Throw error if no matches found (takes precedence over nonull).' },
-  { name: 'maxLength', type: 'number', default: '65536', description: 'Maximum pattern length. Prevents ReDoS attacks.' },
-  { name: 'expandRange', type: 'function', default: 'undefined', description: 'Custom function for expanding ranges in brace patterns.' },
-  { name: 'bash', type: 'boolean', default: 'false', description: 'Follow bash matching rules more strictly.' },
-  { name: 'contains', type: 'boolean', default: 'false', description: 'Match pattern anywhere in string (not just full match).' },
-  { name: 'format', type: 'function', default: 'undefined', description: 'Custom function for formatting strings before matching.' },
-  { name: 'flags', type: 'string', default: 'undefined', description: 'Regex flags to use in generated regex.' },
-  { name: 'strictBrackets', type: 'boolean', default: 'false', description: 'Throw error if brackets, braces, or parens are imbalanced.' },
-  { name: 'literalBrackets', type: 'boolean', default: 'false', description: 'Escape brackets to match literal [ and ].' },
-  { name: 'keepQuotes', type: 'boolean', default: 'false', description: 'Retain quotes in the generated regex.' },
-  { name: 'unescape', type: 'boolean', default: 'false', description: 'Remove backslashes preceding escaped characters.' },
-];
+interface Props {
+  lang?: Lang;
+}
 
-const callbackOptions = [
-  { name: 'onMatch', type: 'function', default: 'undefined', description: 'Called when a pattern matches. Receives match result object.' },
-  { name: 'onIgnore', type: 'function', default: 'undefined', description: 'Called when a pattern is ignored. Receives match result object.' },
-  { name: 'onResult', type: 'function', default: 'undefined', description: 'Called for all results. Receives match result object.' },
-];
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang).options;
 ---
 
 <section class="fade-in" id="options">
   <div class="container-wide">
     <div class="section-header">
       <span class="cmd">options</span>
-      <h2>Options</h2>
-      <p>Configuration options for fine-tuning pattern matching</p>
+      <h2>{t.heading}</h2>
+      <p>{t.sub}</p>
     </div>
 
-    <h3>Core options <span class="chip">minimatch compatible</span></h3>
+    <h3>{t.coreHeading} <span class="chip">{t.coreBadge}</span></h3>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Option</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
+            <th>{t.cols.option}</th>
+            <th>{t.cols.type}</th>
+            <th>{t.cols.default}</th>
+            <th>{t.cols.description}</th>
           </tr>
         </thead>
         <tbody>
-          {coreOptions.map(opt => (
+          {t.core.map(opt => (
             <tr>
               <td><code>{opt.name}</code></td>
               <td class="type-cell"><code>{opt.type}</code></td>
@@ -74,19 +41,19 @@ const callbackOptions = [
       </table>
     </div>
 
-    <h3>Extended options <span class="badge">new in v0.3.0</span></h3>
+    <h3>{t.extendedHeading} <span class="badge">{t.extendedBadge}</span></h3>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Option</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
+            <th>{t.cols.option}</th>
+            <th>{t.cols.type}</th>
+            <th>{t.cols.default}</th>
+            <th>{t.cols.description}</th>
           </tr>
         </thead>
         <tbody>
-          {extendedOptions.map(opt => (
+          {t.extended.map(opt => (
             <tr>
               <td><code>{opt.name}</code></td>
               <td class="type-cell"><code>{opt.type}</code></td>
@@ -98,19 +65,19 @@ const callbackOptions = [
       </table>
     </div>
 
-    <h3>Callback options <span class="badge">new in v0.3.0</span></h3>
+    <h3>{t.callbackHeading} <span class="badge">{t.callbackBadge}</span></h3>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Option</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
+            <th>{t.cols.option}</th>
+            <th>{t.cols.type}</th>
+            <th>{t.cols.default}</th>
+            <th>{t.cols.description}</th>
           </tr>
         </thead>
         <tbody>
-          {callbackOptions.map(opt => (
+          {t.callbacks.map(opt => (
             <tr>
               <td><code>{opt.name}</code></td>
               <td class="type-cell"><code>{opt.type}</code></td>
@@ -122,7 +89,7 @@ const callbackOptions = [
       </table>
     </div>
 
-    <h3>Examples</h3>
+    <h3>{t.examplesHeading}</h3>
     <div class="examples-grid">
       <div class="card example-card">
         <h4>ignore</h4>

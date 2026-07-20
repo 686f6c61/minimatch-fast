@@ -1,5 +1,13 @@
 ---
 import CodeBlock from './CodeBlock.astro';
+import { useTranslations, type Lang } from '../i18n';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang).typescript;
 
 const tsExample = `import minimatch, {
   Minimatch,
@@ -33,36 +41,28 @@ const files: string[] = minimatch.match(['a.js', 'b.ts'], '*.js');
 // Brace expansion
 const expanded: string[] = minimatch.braceExpand('{a,b,c}');`;
 
-const exportedTypes = [
-  { name: 'minimatch', desc: 'The main function' },
-  { name: 'Minimatch', desc: 'The Minimatch class' },
-  { name: 'MinimatchOptions', desc: 'Configuration options interface' },
-  { name: 'MMRegExp', desc: 'Extended RegExp with index info' },
-  { name: 'ParseReturn', desc: 'Type for parsed pattern segments' },
-  { name: 'AST', desc: 'Type for the abstract syntax tree' },
-];
+const exportedTypes = t.types;
 ---
 
 <section class="fade-in" id="typescript">
   <div class="container">
     <div class="section-header">
       <span class="cmd">typescript</span>
-      <h2>TypeScript Support</h2>
-      <p>Full type definitions included</p>
+      <h2>{t.heading}</h2>
+      <p>{t.sub}</p>
     </div>
 
     <div class="ts-content">
       <p class="ts-intro">
-        minimatch-fast ships with complete TypeScript definitions. All types are exported
-        and ready to use without installing separate <code>@types</code> packages.
+        {t.introPre} <code>@types</code> {t.introPost}
       </p>
 
-      <CodeBlock lang="typescript" code={tsExample} />
+      <CodeBlock lang="typescript" code={tsExample} locale={lang} />
 
-      <h3>Exported Types</h3>
+      <h3>{t.exportedHeading}</h3>
       <ul class="type-list list-minimal">
-        {exportedTypes.map(t => (
-          <li><code>{t.name}</code> <span class="type-desc">- {t.desc}</span></li>
+        {exportedTypes.map(type => (
+          <li><code>{type.name}</code> <span class="type-desc">- {type.desc}</span></li>
         ))}
       </ul>
     </div>

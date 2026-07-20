@@ -2,22 +2,26 @@
 import GitHub from './icons/GitHub.astro';
 import Menu from './icons/Menu.astro';
 import Close from './icons/Close.astro';
+import { useTranslations, type Lang } from '../i18n';
 
-const navLinks = [
-  { href: '#features', label: 'features' },
-  { href: '#benchmarks', label: 'benchmarks' },
-  { href: '#install', label: 'install' },
-  { href: '#api', label: 'api' },
-  { href: '#changelog', label: 'changelog' },
-];
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang).header;
+
+const homeHref = lang === 'en' ? '/en/' : '/';
+const langToggleHref = lang === 'en' ? '/' : '/en/';
+const langToggleLabel = lang === 'en' ? 'ES' : 'EN';
 ---
 
 <header class="top-nav">
-  <a href="/" class="brand">686f6c61/minimatch-fast</a>
+  <a href={homeHref} class="brand">686f6c61/minimatch-fast</a>
 
   <div class="nav-controls">
     <ul class="nav-links" id="nav-links">
-      {navLinks.map(link => (
+      {t.nav.map(link => (
         <li>
           <a href={link.href} class="nav-link">{link.label}</a>
         </li>
@@ -28,7 +32,7 @@ const navLinks = [
           class="nav-link nav-github"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="GitHub repository"
+          aria-label={t.githubAria}
         >
           <GitHub size={16} />
           <span class="nav-github-text">github</span>
@@ -36,7 +40,9 @@ const navLinks = [
       </li>
     </ul>
 
-    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+    <a href={langToggleHref} class="lang-toggle" aria-label={t.langToggleAria} hreflang={lang === 'en' ? 'es' : 'en'}>{langToggleLabel}</a>
+
+    <button class="theme-toggle" id="theme-toggle" aria-label={t.themeAria}>
       <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="4" />
         <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
@@ -46,7 +52,7 @@ const navLinks = [
       </svg>
     </button>
 
-    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
+    <button class="menu-toggle" id="menu-toggle" aria-label={t.menuAria} aria-expanded="false" aria-controls="nav-links">
       <Menu class="menu-icon" size={18} />
       <Close class="close-icon" size={18} />
     </button>
@@ -89,6 +95,27 @@ const navLinks = [
   }
 
   .nav-github:hover { color: var(--accent); }
+
+  .lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    padding: 0 .5rem;
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    text-decoration: none;
+    transition: color .15s ease, border-color .15s ease;
+  }
+
+  .lang-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
 
   .theme-toggle {
     display: inline-flex;
