@@ -15,6 +15,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Performance
+
+- **Brace patterns**: compiled natively into a single regex (picomatch accepts braces directly) instead of one matcher per expansion. Complex braces went from 0.43x (3x slower than minimatch) to **3.4x faster**; warm brace matching from 17x to **29x**
+- **Multiple expansions**: combined into a single picomatch matcher (array compilation) instead of N separate matchers looped with `.some()`
+- **match() hot path**: eliminated double matcher invocation on misses (trailing-slash variant was always tried, even when identical), replaced `.some()` closures with a plain loop, and basename is now only computed when actually needed
+- Engine-vs-engine (precompiled, no cache): now 2-6x faster than minimatch on most pattern shapes
+- Benchmark rewritten with unbiased methodology: A/B/B/A interleaving, warmup discarded, medians over 15 rounds, deterministic 1000-path corpus, four scenarios (compile / precompiled / cold / warm)
+
+### Changed
+
+- **Honest metrics**: replaced unverifiable "6-25x faster" claims with measured "up to 29x faster" (warm real-world workload); README benchmark section documents the full methodology and the one remaining slower case (simple 2-way braces, 0.65x)
+
 ## [0.4.0] - 2026-07-20
 
 ### Fixed

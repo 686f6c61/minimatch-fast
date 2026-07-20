@@ -267,17 +267,59 @@ export class Minimatch {
 
     this.debug(this.pattern, this.globParts);
 
-    // Create matchers for each expanded pattern
-    this._matchers = this.globSet.map((p) => {
-      try {
-        // Pre-process pattern for minimatch compatibility
-        const processed = this.preprocessPattern(p);
-        return picomatch(processed, this._picoOpts);
-      } catch {
-        // If picomatch fails, return a matcher that never matches
-        return () => false;
+    // Create matchers for the expanded patterns.
+    // Strategy (fastest first):
+    // 1. Single pattern: compile it directly.
+    // 2. Brace patterns: compile the ORIGINAL unexpanded pattern - picomatch
+    //    compiles braces natively into a single regex with inline alternation
+    //    (?:src|lib), which is much faster than a union of full regexes.
+    // 3. Multiple expansions without braces: one combined matcher from the
+    //    array (picomatch accepts string[] and shares structure).
+    // 4. Fallback: one matcher per expanded pattern.
+    try {
+      if (this.globSet.length === 1) {
+        this._matchers = [
+          picomatch(this.preprocessPattern(this.globSet[0]!), this._picoOpts),
+        ];
+      } else if (
+        !this.options.nobrace &&
+        this.pattern.includes('{') &&
+        // Native brace compilation changes semantics when braces are nested
+        // inside extglob (e.g. *(a|{b,c})), so only use it without extglob
+        !/[@!?+*]\(/.test(this.pattern)
+      ) {
+        try {
+          this._matchers = [
+            picomatch(this.preprocessPattern(this.pattern), this._picoOpts),
+          ];
+        } catch {
+          this._matchers = [
+            picomatch(
+              this.globSet.map((p) => this.preprocessPattern(p)),
+              this._picoOpts
+            ),
+          ];
+        }
+      } else {
+        this._matchers = [
+          picomatch(
+            this.globSet.map((p) => this.preprocessPattern(p)),
+            this._picoOpts
+          ),
+        ];
       }
-    });
+    } catch {
+      // Fallback: one matcher per expanded pattern
+      this._matchers = this.globSet.map((p) => {
+        try {
+          const processed = this.preprocessPattern(p);
+          return picomatch(processed, this._picoOpts);
+        } catch {
+          // If picomatch fails, return a matcher that never matches
+          return () => false;
+        }
+      });
+    }
 
     // Convert to pattern set for internal use
     this.set = this.globParts
@@ -413,6 +455,19 @@ export class Minimatch {
   }
 
   /**
+   * Run all compiled matchers against a string, returning true on first hit.
+   * Uses a plain loop instead of .some() to avoid a closure allocation
+   * per call - this is the hottest path in the library.
+   */
+  private _matchAny(str: string): boolean {
+    const matchers = this._matchers;
+    for (let i = 0; i < matchers.length; i++) {
+      if (matchers[i]!(str)) return true;
+    }
+    return false;
+  }
+
+  /**
    * Test if a path matches the pattern
    *
    * @param path - The path to test
@@ -442,20 +497,24 @@ export class Minimatch {
       path = normalizePath(path, true);
     }
 
-    // Get the basename for special handling (optimized to avoid split)
-    const lastSlashIdx = path.lastIndexOf('/');
-    const basename = lastSlashIdx >= 0 ? path.slice(lastSlashIdx + 1) : path;
+    const matchBase = this.options.matchBase;
 
     // minimatch compatibility: '.' and '..' are never matched by wildcards,
     // even with dot:true. They only match when an expanded pattern
     // explicitly ends with that literal segment.
-    if (basename === '.' || basename === '..') {
-      const explicit = this.globSet.some((glob) => {
-        const idx = glob.lastIndexOf('/');
-        return (idx >= 0 ? glob.slice(idx + 1) : glob) === basename;
-      });
-      if (!explicit) {
-        return this.negate ? true : false;
+    // Cheap precheck: basename can only be '.' or '..' if path ends with '.'
+    let basename: string | undefined;
+    if (path.endsWith('.')) {
+      const lastSlashIdx = path.lastIndexOf('/');
+      basename = lastSlashIdx >= 0 ? path.slice(lastSlashIdx + 1) : path;
+      if (basename === '.' || basename === '..') {
+        const explicit = this.globSet.some((glob) => {
+          const idx = glob.lastIndexOf('/');
+          return (idx >= 0 ? glob.slice(idx + 1) : glob) === basename;
+        });
+        if (!explicit) {
+          return this.negate ? true : false;
+        }
       }
     }
 
@@ -468,25 +527,29 @@ export class Minimatch {
     // Use picomatch matchers for fast matching
     let matches = false;
 
-    if (this.options.matchBase && !path.includes('/')) {
+    if (matchBase && !path.includes('/')) {
       // matchBase mode: match against basename only
-      matches = this._matchers.some((matcher) => matcher(path));
-    } else if (this.options.matchBase) {
+      matches = this._matchAny(path);
+    } else if (matchBase) {
       // matchBase with path: try full path first, then basename
-      matches = this._matchers.some(
-        (matcher) => matcher(path) || matcher(basename)
-      );
+      // (slice(lastIndexOf+1) handles "no slash" correctly, returns path)
+      basename ??= path.slice(path.lastIndexOf('/') + 1);
+      matches = this._matchAny(path) || this._matchAny(basename);
     } else {
-      // Normal mode: match full path
-      // Try with and without trailing slash for compatibility
-      matches = this._matchers.some((matcher) =>
-        matcher(path) || matcher(pathWithoutTrailingSlash)
-      );
+      // Normal mode: match full path.
+      // Only try the trailing-slash-trimmed variant when it actually
+      // differs; otherwise every miss would run each matcher twice
+      // with the same string.
+      matches = this._matchAny(path);
+      if (!matches && pathWithoutTrailingSlash !== path) {
+        matches = this._matchAny(pathWithoutTrailingSlash);
+      }
     }
 
     // minimatch compatibility: negated character classes [^...] should not match dotfiles
     // unless dot option is true
     if (matches && !this.options.dot && this._hasNegatedCharClassCached) {
+      basename ??= path.slice(path.lastIndexOf('/') + 1);
       if (basename.startsWith('.')) {
         matches = false;
       }
